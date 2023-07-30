@@ -1,4 +1,1 @@
-from model import Temp
-
-def args_for_model(parser, model):
-    parser.add_argument('--something', type=str, default="?", help="?")
+version = "1.0.0"
