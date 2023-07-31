@@ -7,6 +7,7 @@ def args_for_data(parser):
     parser.add_argument('--submission', type=str, default='../data/sample_submission.csv')
     parser.add_argument('--path', type=str, default='../data')
     parser.add_argument('--result_path', type=str, default='./result')
+    parser.add_argument('--window_size', type=int, default=10)
     
 def args_for_train(parser):
     parser.add_argument('--cv_k', type=int, default=10, help='k-fold stratified cross validation')
