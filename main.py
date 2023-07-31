@@ -6,7 +6,7 @@ from torch import optim
 
 # Local application imports
 from config import get_args
-from dataset import CustomDataset
+from dataset import DataSet, TestDataSet
 from models import RNNModel, LSTMModel, GRUModel
 from loss_functions import MSE, MAE, MAPE, SMAPE
 import train
@@ -25,8 +25,8 @@ def prepare_model(input_dim, hidden_dim, output_dim, device):
     return model
 
 def run_train(train_data, train_label, valid_data, valid_label, model, lr, epochs, batch_size, device):
-    train_data_set = CustomDataset(train_data, train_label)
-    valid_data_set = CustomDataset(valid_data, valid_label)
+    train_data_set = DataSet(train_data, train_label)
+    valid_data_set = DataSet(valid_data, valid_label)
 
     train_loader = DataLoader(train_data_set, batch_size=batch_size, shuffle=True)
     valid_loader = DataLoader(valid_data_set, batch_size=batch_size, shuffle=False)
@@ -40,7 +40,7 @@ def run_train(train_data, train_label, valid_data, valid_label, model, lr, epoch
     trainer.train()
 
 def run_test(test_data, model, batch_size, device):
-    test_data_set = CustomDataset(test_data, None)
+    test_data_set = TestDataSet(test_data, None)
 
     test_loader = DataLoader(test_data_set, batch_size=batch_size, shuffle=False)
 
