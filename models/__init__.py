@@ -1,4 +1,4 @@
-from Transformer import TimeSeriesTransformer
+from .Transformer import TimeSeriesTransformer
 
 def args_for_model(parser, model):
     if model == 'TimeSeriesTransformer':

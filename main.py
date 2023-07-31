@@ -1,9 +1,7 @@
 import os
 import logging
-import numpy as np
 import pandas as pd
-from functools import partial
-from sklearn.model_selection import StratifiedKFold, KFold
+from sklearn.model_selection import StratifiedKFold
 
 import torch
 from torch import optim, nn
