@@ -1,20 +1,13 @@
-# Standard library imports
-import os
-import sys
-
 # Third party imports
-import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader
 from torch import optim
-from tqdm import tqdm
 
 # Local application imports
 from config import get_args
 from dataset import CustomDataset
-import models
+from models import RNNModel, LSTMModel, GRUModel
 from loss_functions import MSE, MAE, MAPE, SMAPE
 import train
 import test
@@ -26,7 +19,9 @@ def prepare_data(data_path):
     return data
 
 def prepare_model(input_dim, hidden_dim, output_dim, device):
-    model = models.RNNModel(input_dim, hidden_dim, output_dim).to(device)
+    model = RNNModel(input_dim, hidden_dim, output_dim).to(device)
+    # model = LSTMModel(input_dim, hidden_dim, output_dim).to(device)
+    # model = GRUModel(input_dim, hidden_dim, output_dim).to(device)
     return model
 
 def run_train(train_data, train_label, valid_data, valid_label, model, lr, epochs, batch_size, device):

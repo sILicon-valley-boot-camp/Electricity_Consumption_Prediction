@@ -8,7 +8,7 @@ class Tester():
         self.loss_fn = loss_fn
 
         self.predictions = []
-        
+
     def test(self):
         # Testing Phase
         self.model.eval()

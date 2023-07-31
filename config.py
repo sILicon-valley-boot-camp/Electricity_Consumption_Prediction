@@ -1,5 +1,4 @@
 import argparse
-from models import args_for_model
 
 def args_for_main(parser):
     parser.add_argument('--mode', type=str, default='train', hefp='train or test')

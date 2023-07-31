@@ -15,6 +15,3 @@ def SMAPE(true, pred):
     v = 2 * abs(pred - true) / (abs(pred) + abs(true))
     loss = np.mean(v) * 100
     return loss
-
-
-
