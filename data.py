@@ -35,6 +35,6 @@ class TestDataSet(Dataset):
     
     def __getitem__(self, index):
         data = self.data[self.target_index[index]-(self.window_size): self.target_index[index]+1]
-        x = data.drop(columns = [self.drop])  # current time step - 10 ~ current time step, (when window_size=10)
+        x = data.drop(columns = self.drop)  # current time step - 10 ~ current time step, (when window_size=10)
 
-        return {'x': torch.tensor(x, dtype=torch.float)}
+        return {'x': torch.tensor(x.values, dtype=torch.float)}
