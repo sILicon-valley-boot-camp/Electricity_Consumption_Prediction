@@ -22,7 +22,7 @@ if __name__ == "__main__":
     if args.continue_train > 0:
         result_path = args.continue_from_folder
     else:
-        result_path = os.path.join(args.result_path, args.pretrained_model.replace('/', '_') +'_'+str(len(os.listdir(args.result_path))))
+        result_path = os.path.join(args.result_path, args.model +'_'+str(len(os.listdir(args.result_path))))
         os.makedirs(result_path)
     
     logging.basicConfig(level=logging.INFO, format='%(message)s')
