@@ -61,6 +61,7 @@ class TimeSeriesTransformerEncoder(nn.Module):
     
 class TimeSeriesTransformer(nn.Module):
     def __init__(self, args):
+        super().__init__()
         self.transformer_encoder = TimeSeriesTransformerEncoder(args)
         self.linear = nn.Linear(args.feature_size, 1)
 
