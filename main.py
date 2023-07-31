@@ -29,7 +29,7 @@ def prepare_model(input_dim, hidden_dim, output_dim, device):
     model = models.RNNModel(input_dim, hidden_dim, output_dim).to(device)
     return model
 
-def run_train(train_data, train_label, valid_data, valid_label, model, batch_size, device):
+def run_train(train_data, train_label, valid_data, valid_label, model, lr, epochs, batch_size, device):
     train_data_set = CustomDataset(train_data, train_label)
     valid_data_set = CustomDataset(valid_data, valid_label)
 
@@ -64,12 +64,15 @@ if __name__ == "__main__":
     model = prepare_model(args.input_dim, args.hidden_dim, args.output_dim, device)
 
     if args.mode == 'train':
+        lr = args.lr
+        epochs = args.epochs
+
         train_data = prepare_data(args.train_data_path)
         train_label = prepare_data(args.train_label_path)
         valid_data = prepare_data(args.valid_data_path)
         valid_label = prepare_data(args.valid_label_path)
         
-        run_train(train_data, train_label, valid_data, valid_label, model, args.batch_size, device)
+        run_train(train_data, train_label, valid_data, valid_label, model, lr, epochs, args.batch_size, device)
 
     else: # args.mode == 'test'
         test_data = prepare_data(args.test_data_path)
