@@ -2,7 +2,6 @@ import torch
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
-
 class Trainer():
     def __init__(self, train_loader, valid_loader, model, loss_fn, optimizer, epochs):
         self.train_loader = train_loader
@@ -22,10 +21,17 @@ class Trainer():
             # Training Phase
             self.model.train()
             progress_bar = tqdm(enumerate(self.train_loader), total=len(self.train_loader))
-            for i, (inputs, labels) in progress_bar:
+            for i, batch in progress_bar:
+                # 입력 데이터와 레이블 추출
+                inputs = batch['input']
+                labels = batch['label']
+
+                # 예측값 계산
                 outputs = self.model(inputs)
+
+                # 손실 계산
                 loss = self.loss_fn(outputs, labels)
-                
+
                 self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()
@@ -41,7 +47,9 @@ class Trainer():
             self.model.eval()
             with torch.no_grad():
                 running_valid_loss = 0.0
-                for inputs, labels in self.valid_loader:
+                for batch in self.valid_loader:
+                    inputs = batch['input']
+                    labels = batch['label']
                     outputs = self.model(inputs)
                     loss = self.loss_fn(outputs, labels)
                     running_valid_loss += loss.item() * inputs.size(0)

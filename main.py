@@ -1,22 +1,17 @@
 # Third party imports
 import pandas as pd
 import torch
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, random_split
 from torch import optim
 
 # Local application imports
 from config import get_args
-from dataset import DataSet, TestDataSet
+from dataset import BuildingDataset
 from models import RNNModel, LSTMModel, GRUModel
 from loss_functions import MSE, MAE, MAPE, SMAPE
 import train
 import test
 from utils import seed_everything
-
-def prepare_data(data_path):
-    data = pd.read_csv(data_path)
-    data = data.iloc[:, 1:].values
-    return data
 
 def prepare_model(input_dim, hidden_dim, output_dim, device):
     model = RNNModel(input_dim, hidden_dim, output_dim).to(device)
@@ -24,25 +19,28 @@ def prepare_model(input_dim, hidden_dim, output_dim, device):
     # model = GRUModel(input_dim, hidden_dim, output_dim).to(device)
     return model
 
-def run_train(train_data, train_label, valid_data, valid_label, model, lr, epochs, batch_size, device):
-    train_data_set = DataSet(train_data, train_label)
-    valid_data_set = DataSet(valid_data, valid_label)
+def run_train(dataset, model, lr, epochs, batch_size):
 
-    train_loader = DataLoader(train_data_set, batch_size=batch_size, shuffle=True)
-    valid_loader = DataLoader(valid_data_set, batch_size=batch_size, shuffle=False)
+    train_size = int(0.8 * len(dataset))
+    valid_size = len(dataset) - train_size
+    train_dataset, valid_dataset = random_split(dataset, [train_size, valid_size])
+
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    valid_loader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=False)
     
     optimizer = optim.Adam(model.parameters(), lr=lr)
     
     # Choose loss function
     loss_function = MSE()
+    # loss_function = MAE()
+    # loss_function = MAPE()
+    # loss_function = SMAPE()
 
     trainer = train.Trainer(train_loader, valid_loader, model, loss_function, optimizer, epochs)
     trainer.train()
 
-def run_test(test_data, model, batch_size, device):
-    test_data_set = TestDataSet(test_data, None)
-
-    test_loader = DataLoader(test_data_set, batch_size=batch_size, shuffle=False)
+def run_test(dataset, model, batch_size):
+    test_loader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
 
     # Choose loss function
     loss_function = MSE()
@@ -53,23 +51,17 @@ def run_test(test_data, model, batch_size, device):
 if __name__ == "__main__":
     args = get_args()
     seed_everything(args.seed)
-
     device = torch.device('cuda:0')
-
     model = prepare_model(args.input_dim, args.hidden_dim, args.output_dim, device)
 
     if args.mode == 'train':
         lr = args.lr
         epochs = args.epochs
+        dataset = BuildingDataset(args.data_path, args.window_size, args.mode)
 
-        train_data = prepare_data(args.train_data_path)
-        train_label = prepare_data(args.train_label_path)
-        valid_data = prepare_data(args.valid_data_path)
-        valid_label = prepare_data(args.valid_label_path)
-        
-        run_train(train_data, train_label, valid_data, valid_label, model, lr, epochs, args.batch_size, device)
+        run_train(dataset, model, lr, epochs, args.batch_size)
 
     else: # args.mode == 'test'
-        test_data = prepare_data(args.test_data_path)
+        dataset = BuildingDataset(args.data_path, args.window_size, args.mode)
 
-        run_test(test_data, model, args.batch_size, device)
+        run_test(dataset, model, args.batch_size)
