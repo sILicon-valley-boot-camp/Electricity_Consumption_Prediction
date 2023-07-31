@@ -30,7 +30,7 @@ def get_args():
     args_for_data(parser)
     args_for_train(parser)
     _args, _ = parser.parse_known_args()
-    args_for_model(parser. _args.model)
+    args_for_model(parser, _args.model)
 
     args = parser.parse_args()
     return args
