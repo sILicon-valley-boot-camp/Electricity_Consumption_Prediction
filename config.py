@@ -2,6 +2,7 @@ import argparse
 
 def args_for_main(parser):
     parser.add_argument('--mode', type=str, default='train', hefp='train or test')
+    parser.add_argument('--window_size', type=int, default=10, help='window size')
     parser.add_argument('--seed', type=int, default=42, help='seed for random')
     parser.add_argument('--num_workers', type=int, default=4, help='num_workers')
     parser.add_argument('--batch_size', type=int, default=None, help='batch_size')
