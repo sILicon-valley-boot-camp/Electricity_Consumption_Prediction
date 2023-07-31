@@ -8,13 +8,12 @@ from sklearn.model_selection import StratifiedKFold, KFold
 import torch
 from torch import optim, nn
 from torch.utils.data import DataLoader
-from torch.optim.lr_scheduler import CosineAnnealingLR
-from warmup_scheduler import GradualWarmupScheduler
 
+import models
 from config import get_args
 from trainer import Trainer
+from lr_scheduler import get_sch
 from utils import seed_everything
-from models import Temp
 from data import DataSet, TestDataSet
 
 if __name__ == "__main__":
@@ -82,9 +81,10 @@ if __name__ == "__main__":
         train_dataset = DataSet(data=train_data, label=output_index, window_size=args.window_size, target_index=kfold_train_index)
         valid_dataset = DataSet(data=train_data, label=output_index, window_size=args.window_size, target_index=kfold_valid_index)
 
-        model = Temp(args).to(device) #make model based on the model name and args
+        model = getattr(models , args.model)(args).to(device)
         loss_fn = nn.CrossEntropyLoss()
         optimizer = optim.Adam(model.parameters(), lr=args.lr)
+        scheduler = get_sch(args.scheduler)(optimizer)
 
         train_loader = DataLoader(
             train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, #pin_memory=True
@@ -93,9 +93,6 @@ if __name__ == "__main__":
             valid_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers, #pin_memory=True
         )
         
-        #scheduler_warmup = GradualWarmupScheduler(optimizer, multiplier=1, total_epoch=args.warmup_epochs, after_scheduler=None)
-        scheduler = CosineAnnealingLR()
-
         trainer = Trainer(
             train_loader, valid_loader, model, loss_fn, optimizer, scheduler, device, args.patience, args.epochs, fold_result_path, fold_logger, len(train_dataset), len(valid_dataset))
         trainer.train() #start training

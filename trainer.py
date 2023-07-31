@@ -26,11 +26,11 @@ class Trainer():
     def train(self):
         best = np.inf
         for epoch in range(1,self.epochs+1):
-            loss_train, score_train = self.train_step()
-            loss_val, score_val = self.valid_step()
+            loss_train = self.train_step()
+            loss_val = self.valid_step()
             self.scheduler.step()
 
-            self.logger.info(f'Epoch {str(epoch).zfill(5)}: t_loss:{loss_train:.3f} t_score:{score_train:.3f} v_loss:{loss_val:.3f} v_score:{score_val:.3f}')
+            self.logger.info(f'Epoch {str(epoch).zfill(5)}: t_loss:{loss_train:.3f} v_loss:{loss_val:.3f}')
 
             if loss_val < best:
                 best = loss_val
@@ -47,9 +47,8 @@ class Trainer():
         self.model.train()
 
         total_loss = 0
-        correct = 0
         for batch in tqdm(self.train_loader, file=sys.stdout): #tqdm output will not be written to logger file(will only written to stdout)
-            x, y = batch['data'].to(self.device), batch['label'].to(self.device)
+            x, y = batch['x'].to(self.device), batch['y'].to(self.device)
 
             self.optimizer.zero_grad()
             output = self.model(x)            
@@ -58,15 +57,13 @@ class Trainer():
             self.optimizer.step()
 
             total_loss += loss.item() * x.shape[0]
-            correct += sum(output.argmax(dim=1) == y).item() # classification task
         
-        return total_loss/self.len_train, correct/self.len_train
+        return total_loss/self.len_train
     
     def valid_step(self):
         self.model.eval()
         with torch.no_grad():
             total_loss = 0
-            correct = 0
             for batch in self.valid_loader:
                 x, y = batch['data'].to(self.device), batch['label'].to(self.device)
 
@@ -74,10 +71,9 @@ class Trainer():
                 loss = self.loss_fn(output, y)
 
                 total_loss += loss.item() * x['pixel_values'].shape[0]
-                correct += sum(output.argmax(dim=1) == y).item() # classification task
                 
-        return total_loss/self.len_valid, correct/self.len_valid
-
+        return total_loss/self.len_valid
+    
     def test(self, test_loader):
         self.model.load_state_dict(torch.load(self.best_model_path))
         self.model.eval()

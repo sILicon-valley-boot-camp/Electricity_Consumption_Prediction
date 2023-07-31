@@ -1,13 +1,7 @@
 import math
-import numpy as np
-from tqdm import tqdm
 
 import torch
 import torch.nn as nn
-
-from src.models.pyg_ns import define_ns_gnn_encoder
-from src.models.utils import init_weights, get_act_fn
-from src.models.utils import init_weights, get_act_fn, trunc_normal_
 
 class PositionalEncoding(nn.Module):
     def __init__(self, d_model, max_len=5000):
@@ -24,7 +18,7 @@ class PositionalEncoding(nn.Module):
     def forward(self, x):
         return x + self.pe[:x.size(0), :] #(length, 1, feat)
 
-class TimeSeriesTransformer(nn.Module):
+class TimeSeriesTransformerEncoder(nn.Module):
     def __init__(self, args):
         super().__init__()
         self.transformer_pooling = args['transformer_pooling'] 
@@ -40,7 +34,7 @@ class TimeSeriesTransformer(nn.Module):
         if self.use_cls:
             cls_tokens = self.cls_token.expand(-1, src.shape[1], -1)
             src = torch.cat((cls_tokens, src), dim=0)
-        mask = self._generate_square_subsequent_mask(len(src)).cuda() #delete
+        mask = self._generate_square_subsequent_mask(len(src)).cuda() # to force model not see correct label of current timestep
         self.src_mask = mask
         src = self.pos_encoder(src)
         output = self.transformer_encoder(src,self.src_mask)
@@ -64,108 +58,13 @@ class TimeSeriesTransformer(nn.Module):
         mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)
         mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
         return mask
-
-
-class TransformerGNN(torch.nn.Module):
-    """
-    model class for Transformer-GNN with node-sampling scheme.
-    """
+    
+class TimeSeriesTransformer(nn.Module):
     def __init__(self, args):
-        super().__init__()
-        self.input_layer = nn.Linear(args['input_size'], args['feature_size'])
-        self.transformer_encoder = TimeSeriesTransformer(args)        
-        self.gnn_name = args['gnn_name']
-        self.gnn_encoder = define_ns_gnn_encoder(args['gnn_name'])(args)
-        self.last_act = get_act_fn(args['final_act_fn'])
-        self.transformer_out = nn.Linear(args['feature_size'], args['out_dim'])
-        self._initialize_weights()
+        self.transformer_encoder = TimeSeriesTransformerEncoder(args)
+        self.linear = nn.Linear(args.feature_size, 1)
 
-    def _initialize_weights(self):
-        init_weights(self.modules())
-
-    def forward(self, x, flat, adjs, batch_size, edge_weight):
-        x = self.input_layer(x) #change dimension of input to match pos encoder
-        seq = x.permute(1, 0, 2)
-        out = self.transformer_encoder.forward(seq)
-        last = out[:, -1, :] if len(out.shape)==3 else out
-        last = last[:batch_size]
-        out = out.view(out.size(0), -1) # all_nodes, transformer_outdim
-        x = out
-        x = self.gnn_encoder(x, flat, adjs, edge_weight, last)
-        y = self.last_act(x)        
-        transformer_y = self.last_act(self.transformer_out(last))
-        return y, transformer_y
-    
-    def infer_transformer_by_batch(self, ts_loader, device):
-        transformer_outs = []
-        lasts = []
-        transformer_ys = []
-        for inputs, labels, ids in ts_loader:
-            seq, flat = inputs
-            seq = seq.to(device)
-            seq = self.input_layer(seq)
-            seq = seq.permute(1, 0, 2)
-            out = self.transformer_encoder.forward(seq)
-            last = out[:, -1, :] if len(out.shape)==3 else out
-            out = out.view(out.size(0), -1)
-            transformer_y = self.last_act(self.transformer_out(last))
-            transformer_outs.append(out)
-            lasts.append(last)
-            transformer_ys.append(transformer_y)
-        transformer_outs = torch.cat(transformer_outs, dim=0) # [entire_g, dim]
-        lasts = torch.cat(lasts, dim=0) # [entire_g, dim]
-        transformer_ys = torch.cat(transformer_ys, dim=0)
-        print('Got all transformer output.')
-        return transformer_outs, lasts, transformer_ys
-    
-    def infer_transformer_by_batch_attn(self, ts_loader, device):
-        transformer_outs = []
-        lasts = []
-        transformer_ys = []
-        transformer_input = []
-        attentions = []
-
-        def hook(m, i, o):
-            attentions.append(o[1].detach().cpu().numpy())
-
-        for encoder_layer in self.transformer_encoder.transformer_encoder.layers:
-            encoder_layer.self_attn.register_forward_hook(hook)
-
-        for inputs, labels, ids in ts_loader:
-            seq, flat = inputs
-            transformer_input.append(seq.detach().cpu().numpy())
-            seq = seq.to(device)
-            seq = self.input_layer(seq)
-            seq = seq.permute(1, 0, 2)
-            out = self.transformer_encoder.forward(seq)
-            last = out[:, -1, :] if len(out.shape)==3 else out
-            out = out.view(out.size(0), -1)
-            transformer_y = self.last_act(self.transformer_out(last))
-            transformer_outs.append(out)
-            lasts.append(last)
-            transformer_ys.append(transformer_y)
-        transformer_outs = torch.cat(transformer_outs, dim=0) # [entire_g, dim]
-        lasts = torch.cat(lasts, dim=0) # [entire_g, dim]
-        transformer_ys = torch.cat(transformer_ys, dim=0)
-        print('Got all transformer output.')
-        return transformer_outs, lasts, transformer_ys, (np.stack(transformer_input), np.stack(attentions))
-
-    def inference(self, x_all, flat_all, edge_weight, ts_loader, subgraph_loader, device, get_emb=False, is_gat=False, get_attention = False):
-        # first collect transformer outputs by minibatching:
-        if get_attention:
-            transformer_outs, last_all, transformer_ys, input_with_attention = self.infer_transformer_by_batch_attn(ts_loader, device)
-        else:
-            transformer_outs, last_all, transformer_ys = self.infer_transformer_by_batch(ts_loader, device)
-
-        # then pass transformer outputs to gnn
-        x_all = transformer_outs
-        out = self.gnn_encoder.inference(x_all, flat_all, subgraph_loader, device, edge_weight, last_all, get_emb=get_emb)
-
-        if is_gat:
-            out = out[0]
-        out = self.last_act(out)
-
-        if get_attention:
-            return input_with_attention
-
-        return out, transformer_ys
+    def forward(self, src):
+        src = torch.transpose(src, 0, 1).contiguous() # change to (seq, bs, feat) shape
+        out = self.transformer_encoder(src) # return (bs, feat)
+        return self.linear(out)
