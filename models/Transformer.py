@@ -21,14 +21,14 @@ class PositionalEncoding(nn.Module):
 class TimeSeriesTransformerEncoder(nn.Module):
     def __init__(self, args):
         super().__init__()
-        self.transformer_pooling = args['transformer_pooling'] 
-        self.pos_encoder = PositionalEncoding(args['feature_size'])
+        self.transformer_pooling = args.transformer_pooling 
+        self.pos_encoder = PositionalEncoding(args.feature_size)
         self.use_cls = False
-        if args['transformer_pooling']== 'first':
+        if args.transformer_pooling== 'first':
             self.use_cls = True
-            self.cls_token = nn.Parameter(torch.zeros(1, 1, args['feature_size']))
-        self.encoder_layer = nn.TransformerEncoderLayer(d_model=args['feature_size'], nhead=args['n_head'], dropout=args['transformer_dropout'], register_hook=args['fp_attn_transformer']) #(seq, bs, feat)
-        self.transformer_encoder = nn.TransformerEncoder(self.encoder_layer, num_layers=args['num_layers'])
+            self.cls_token = nn.Parameter(torch.zeros(1, 1, args.feature_size))
+        self.encoder_layer = nn.TransformerEncoderLayer(d_model=args.feature_size, nhead=args.n_head, dropout=args.transformer_dropout) #(seq, bs, feat)
+        self.transformer_encoder = nn.TransformerEncoder(self.encoder_layer, num_layers=args.num_layers)
                 
     def forward(self, src):
         if self.use_cls:
