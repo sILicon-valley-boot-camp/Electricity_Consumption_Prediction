@@ -62,12 +62,12 @@ class Trainer():
         with torch.no_grad():
             total_loss = 0
             for batch in self.valid_loader:
-                x, y = batch['data'].to(self.device), batch['label'].to(self.device)
+                x, y = batch['x'].to(self.device), batch['y'].to(self.device)
 
                 output = self.model(x)
                 loss = self.loss_fn(output, y)
 
-                total_loss += loss.item() * x['pixel_values'].shape[0]
+                total_loss += loss.item() * x.shape[0]
                 
         return total_loss/self.len_valid
     
@@ -77,7 +77,7 @@ class Trainer():
         with torch.no_grad():
             result = []
             for batch in test_loader:
-                x = batch['data'].to(self.device)
+                x = batch['x'].to(self.device)
                 output = self.model(x).detach().cpu().numpy()
                 result.append(output)
 
