@@ -18,6 +18,8 @@ class DataSet(Dataset):
         data = self.data[self.target_index[index]-(self.window_size): self.target_index[index]+1]
         y = data[self.label] # current time step - 11 ~ current time step, (when window_size=10)
         x = data.iloc[1:].drop(columns = [self.label] + self.drop)  # current time step - 10 ~ current time step, (when window_size=10)
+        x['label'] = y[:-1]
+        y = y[-1]
 
         return {'x': torch.tensor(x.values, dtype=torch.float), #(window_size, feat_dim)
                 'y': torch.tensor(y.values, dtype=torch.float)} #(window_size+1, )
