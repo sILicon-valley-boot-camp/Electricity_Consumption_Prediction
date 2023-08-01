@@ -68,4 +68,4 @@ class TimeSeriesTransformer(nn.Module):
     def forward(self, src):
         src = torch.transpose(src, 0, 1).contiguous() # change to (seq, bs, feat) shape
         out = self.transformer_encoder(src) # return (bs, feat)
-        return self.linear(out)
+        return self.linear(out).squeeze(1)
