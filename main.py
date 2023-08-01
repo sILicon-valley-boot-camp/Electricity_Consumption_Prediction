@@ -100,7 +100,7 @@ if __name__ == "__main__":
             test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers
         ) #make test data loader
 
-        prediction[output_index] += trainer.test(test_loader) #softmax applied output; accumulate test prediction of current fold model
+        prediction['answer'] += trainer.test(test_loader) #softmax applied output; accumulate test prediction of current fold model
         prediction.to_csv(os.path.join(result_path, 'sum.csv'), index=False) 
         
         stackking_input.loc[valid_index, output_index] = trainer.test(valid_loader) #use the validation data(hold out dataset) to make input for Stacking Ensemble model(out of fold prediction)
