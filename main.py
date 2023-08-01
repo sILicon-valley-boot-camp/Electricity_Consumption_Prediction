@@ -80,7 +80,7 @@ if __name__ == "__main__":
         valid_dataset = DataSet(data=train_data, label=output_index, window_size=args.window_size, target_index=kfold_valid_index)
 
         model = getattr(models , args.model)(args, input_size).to(device)
-        loss_fn = nn.CrossEntropyLoss()
+        loss_fn = nn.MSELoss()
         optimizer = optim.Adam(model.parameters(), lr=args.lr)
         scheduler = get_sch(args.scheduler)(optimizer)
 
