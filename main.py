@@ -50,7 +50,7 @@ if __name__ == "__main__":
     train_time = pd.date_range(train_start + pd.Timedelta(hours=(args.window_size)) , train_end, freq='H') #args.window_size의 이후의 시간부터 loss function에 제공
     train_target_data = train_data[train_data['일시'].isin(train_time)] #train_start time_stamp's data will not be used(except electricity consumption) 
 
-    input_size = None
+    input_size = train_data.shape[1]-2
     output_index = '전력소비량(kWh)'
 
     prediction = pd.read_csv(args.submission)
@@ -79,7 +79,7 @@ if __name__ == "__main__":
         train_dataset = DataSet(data=train_data, label=output_index, window_size=args.window_size, target_index=kfold_train_index)
         valid_dataset = DataSet(data=train_data, label=output_index, window_size=args.window_size, target_index=kfold_valid_index)
 
-        model = getattr(models , args.model)(args).to(device)
+        model = getattr(models , args.model)(args, input_size).to(device)
         loss_fn = nn.CrossEntropyLoss()
         optimizer = optim.Adam(model.parameters(), lr=args.lr)
         scheduler = get_sch(args.scheduler)(optimizer)
