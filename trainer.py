@@ -22,6 +22,7 @@ class Trainer():
     
     def train(self):
         best = np.inf
+        bad_counter = 0
         for epoch in range(1,self.epochs+1):
             loss_train = self.train_step()
             loss_val = self.valid_step()
