@@ -3,9 +3,9 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 
 class BuildingDataset(Dataset):
-    def __init__(self, csv_file, info_file, window_size=10, mode='train'):
-        self.data = pd.read_csv(csv_file)
-        self.info = pd.read_csv(info_file)
+    def __init__(self, csv_path, info_path, window_size=10, mode='train'):
+        self.data = pd.read_csv(csv_path)
+        self.info = pd.read_csv(info_path)
         self.data['강수량(mm)'].fillna(0, inplace=True)  # 강수량의 누락된 값을 0으로 채움
         self.data['일조(hr)'].fillna(self.data['일조(hr)'].mean(), inplace=True)  # 일조의 누락된 값을 평균값으로 채움
         self.data['일사(MJ/m2)'].fillna(self.data['일사(MJ/m2)'].mean(), inplace=True)  # 일사의 누락된 값을 평균값으로 채움
