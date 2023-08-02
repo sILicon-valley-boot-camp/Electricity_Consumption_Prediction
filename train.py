@@ -23,9 +23,8 @@ class Trainer():
             self.model.train()
             progress_bar = tqdm(enumerate(self.train_loader), total=len(self.train_loader))
             for i, batch in progress_bar:
-                barch = batch.float()
-                inputs = batch['input'].to(self.device)
-                labels = batch['label'].to(self.device)
+                inputs = batch['input'].float().to(self.device)
+                labels = batch['label'].float().to(self.device)
                 outputs = self.model(inputs)
                 loss = self.loss_fn(outputs, labels)
 
@@ -45,9 +44,8 @@ class Trainer():
             with torch.no_grad():
                 running_valid_loss = 0.0
                 for batch in self.valid_loader:
-                    batch = batch.float()
-                    inputs = batch['input'].to(self.device)
-                    labels = batch['label'].to(self.device)
+                    inputs = batch['input'].float().to(self.device)
+                    labels = batch['label'].float().to(self.device)
                     outputs = self.model(inputs)
                     loss = self.loss_fn(outputs, labels)
                     running_valid_loss += loss.item() * inputs.size(0)
