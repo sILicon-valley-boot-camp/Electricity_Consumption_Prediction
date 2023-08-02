@@ -2,16 +2,16 @@ import numpy as np
 import torch
 from torch.nn import MSELoss, L1Loss
 
-def MSE(true, pred):
-    return MSELoss(true, pred)
+def MSE(pred, true):
+    return MSELoss()(pred, true)
 
-def MAE(predicted, target):
-    return L1Loss(predicted, target)
+def MAE(pred, true):
+    return L1Loss()(pred, true)
 
-def MAPE(predicted, target):
-    return torch.mean(torch.abs((target - predicted) / target)) * 100
+def MAPE(pred, true):
+    return torch.mean(torch.abs((true - pred) / true)) * 100
 
-def SMAPE(true, pred):
-    v = 2 * abs(pred - true) / (abs(pred) + abs(true))
+def SMAPE(pred, true):
+    v = 2 * abs(true - pred) / (abs(true) + abs(pred))
     loss = np.mean(v) * 100
     return loss
