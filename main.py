@@ -59,9 +59,9 @@ if __name__ == "__main__":
         epochs = args.epochs
         dataset = BuildingDataset(args.data_path, args.info_path, args.window_size, args.mode)
 
-        run_train(dataset, model, lr, epochs, args.batch_size)
+        run_train(dataset, model, lr, epochs, args.batch_size, device)
 
     else: # args.mode == 'test'
         dataset = BuildingDataset(args.data_path, args.info_path, args.window_size, args.mode)
 
-        run_test(dataset, model, args.batch_size)
+        run_test(dataset, model, args.batch_size, device)
