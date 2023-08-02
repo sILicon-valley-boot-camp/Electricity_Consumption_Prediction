@@ -101,10 +101,3 @@ class BuildingDataset(Dataset):
             return {
                 'input': input_data
             }
-
-dataset = BuildingDataset('data/train.csv', 'data/building_info.csv', window_size=24, mode='train')
-loader = DataLoader(dataset, batch_size=1, shuffle=True)
-
-for data in loader:
-    tmp = 1
-    print("!")
