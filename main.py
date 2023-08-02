@@ -31,10 +31,10 @@ def run_train(dataset, model, lr, epochs, batch_size):
     optimizer = optim.Adam(model.parameters(), lr=lr)
     
     # Choose loss function
-    loss_function = MSE()
-    # loss_function = MAE()
-    # loss_function = MAPE()
-    # loss_function = SMAPE()
+    loss_function = MSE
+    # loss_function = MAE
+    # loss_function = MAPE
+    # loss_function = SMAPE
 
     trainer = train.Trainer(train_loader, valid_loader, model, loss_function, optimizer, epochs)
     trainer.train()
