@@ -3,13 +3,14 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 class Trainer():
-    def __init__(self, train_loader, valid_loader, model, loss_fn, optimizer, epochs):
+    def __init__(self, train_loader, valid_loader, model, loss_fn, optimizer, epochs, device):
         self.train_loader = train_loader
         self.valid_loader = valid_loader
         self.model = model
         self.loss_fn = loss_fn
         self.optimizer = optimizer
         self.epochs = epochs
+        self.device = device
 
     def train(self):
         train_loss_values = []
@@ -23,8 +24,8 @@ class Trainer():
             progress_bar = tqdm(enumerate(self.train_loader), total=len(self.train_loader))
             for i, batch in progress_bar:
                 # 입력 데이터와 레이블 추출
-                inputs = batch['input']
-                labels = batch['label']
+                inputs = batch['input'].to(self.device)
+                labels = batch['label'].to(self.device)
 
                 # 예측값 계산
                 outputs = self.model(inputs)
@@ -48,8 +49,8 @@ class Trainer():
             with torch.no_grad():
                 running_valid_loss = 0.0
                 for batch in self.valid_loader:
-                    inputs = batch['input']
-                    labels = batch['label']
+                    inputs = batch['input'].to(self.device)
+                    labels = batch['label'].to(self.device)
                     outputs = self.model(inputs)
                     loss = self.loss_fn(outputs, labels)
                     running_valid_loss += loss.item() * inputs.size(0)

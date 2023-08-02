@@ -19,7 +19,7 @@ def prepare_model(input_dim, hidden_dim, output_dim, num_layers, device):
     # model = GRUModel(input_dim, hidden_dim, output_dim, num_layers).to(device)
     return model
 
-def run_train(dataset, model, lr, epochs, batch_size):
+def run_train(dataset, model, lr, epochs, batch_size, device):
 
     train_size = int(0.8 * len(dataset))
     valid_size = len(dataset) - train_size
@@ -36,16 +36,16 @@ def run_train(dataset, model, lr, epochs, batch_size):
     # loss_function = MAPE
     # loss_function = SMAPE
 
-    trainer = train.Trainer(train_loader, valid_loader, model, loss_function, optimizer, epochs)
+    trainer = train.Trainer(train_loader, valid_loader, model, loss_function, optimizer, epochs, device)
     trainer.train()
 
-def run_test(dataset, model, batch_size):
+def run_test(dataset, model, batch_size, device):
     test_loader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
 
     # Choose loss function
     loss_function = MSE()
 
-    tester = test.Tester(test_loader, model, loss_function)
+    tester = test.Tester(test_loader, model, loss_function, device)
     tester.test()
 
 if __name__ == "__main__":
