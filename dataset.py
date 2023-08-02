@@ -7,6 +7,8 @@ class BuildingDataset(Dataset):
         self.data = pd.read_csv(csv_path)
         self.info = pd.read_csv(info_path)
         self.data['강수량(mm)'].fillna(0, inplace=True)  # 강수량의 누락된 값을 0으로 채움
+        self.data['풍속(m/s)'].interpolate()  # 풍속의 누락된 값을 선형보간으로 채움
+        self.data['습도(%)'].interpolate()  # 습도의 누락된 값을 선형보간으로 채움
         self.data['일조(hr)'].fillna(self.data['일조(hr)'].mean(), inplace=True)  # 일조의 누락된 값을 평균값으로 채움
         self.data['일사(MJ/m2)'].fillna(self.data['일사(MJ/m2)'].mean(), inplace=True)  # 일사의 누락된 값을 평균값으로 채움
 
