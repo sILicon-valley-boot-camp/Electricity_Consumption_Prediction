@@ -30,7 +30,6 @@ def run_train(dataset, model, lr, epochs, batch_size, device):
     
     optimizer = optim.Adam(model.parameters(), lr=lr)
     
-    # Choose loss function
     loss_function = MSE
     # loss_function = MAE
     # loss_function = MAPE
@@ -42,8 +41,10 @@ def run_train(dataset, model, lr, epochs, batch_size, device):
 def run_test(dataset, model, batch_size, device):
     test_loader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
 
-    # Choose loss function
-    loss_function = MSE()
+    loss_function = MSE
+    # loss_function = MAE
+    # loss_function = MAPE
+    # loss_function = SMAPE
 
     tester = test.Tester(test_loader, model, loss_function, device)
     tester.test()
