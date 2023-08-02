@@ -13,10 +13,10 @@ import train
 import test
 from utils import seed_everything
 
-def prepare_model(input_dim, hidden_dim, output_dim, device):
-    model = RNNModel(input_dim, hidden_dim, output_dim).to(device)
-    # model = LSTMModel(input_dim, hidden_dim, output_dim).to(device)
-    # model = GRUModel(input_dim, hidden_dim, output_dim).to(device)
+def prepare_model(input_dim, hidden_dim, output_dim, num_layers, device):
+    model = RNNModel(input_dim, hidden_dim, output_dim, num_layers).to(device)
+    # model = LSTMModel(input_dim, hidden_dim, output_dim, num_layers).to(device)
+    # model = GRUModel(input_dim, hidden_dim, output_dim, num_layers).to(device)
     return model
 
 def run_train(dataset, model, lr, epochs, batch_size):
@@ -52,7 +52,7 @@ if __name__ == "__main__":
     args = get_args()
     seed_everything(args.seed)
     device = torch.device('cuda:0')
-    model = prepare_model(args.input_dim, args.hidden_dim, args.output_dim, device)
+    model = prepare_model(args.input_dim, args.hidden_dim, args.output_dim, args.num_layers, device)
 
     if args.mode == 'train':
         lr = args.lr

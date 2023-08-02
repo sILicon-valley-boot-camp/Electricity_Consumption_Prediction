@@ -1,11 +1,11 @@
 import argparse
 
 def args_for_main(parser):
-    parser.add_argument('--mode', type=str, default='train', hefp='train or test')
+    parser.add_argument('--mode', type=str, default='train', help='train or test')
     parser.add_argument('--window_size', type=int, default=10, help='window size')
     parser.add_argument('--seed', type=int, default=42, help='seed for random')
-    parser.add_argument('--num_workers', type=int, default=4, help='num_workers')
-    parser.add_argument('--batch_size', type=int, default=None, help='batch_size')
+    parser.add_argument('--num_workers', type=int, default=0, help='num_workers')
+    parser.add_argument('--batch_size', type=int, default=1, help='batch_size')
 
 def args_for_train(parser):
     parser.add_argument('--data_path', type=str, default=None, help='data path')
@@ -15,6 +15,7 @@ def args_for_train(parser):
     parser.add_argument('--input_dim', type=int, default=1, help='input dimension')
     parser.add_argument('--hidden_dim', type=int, default=128, help='hidden dimension')
     parser.add_argument('--output_dim', type=int, default=1, help='output dimension')
+    parser.add_argument('--num_layers', type=int, default=1, help='num_layers')
 
 def args_for_test(parser):
     parser.add_argument('--data_path', type=str, default=None, help='data path')
@@ -22,6 +23,8 @@ def args_for_test(parser):
     parser.add_argument('--input_dim', type=int, default=1, help='input dimension')
     parser.add_argument('--hidden_dim', type=int, default=128, help='hidden dimension')
     parser.add_argument('--output_dim', type=int, default=1, help='output dimension')
+    parser.add_argument('--num_layers', type=int, default=1, help='num_layers')
+
 
 
 def get_args():

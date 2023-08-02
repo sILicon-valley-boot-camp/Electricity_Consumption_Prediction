@@ -91,11 +91,3 @@ class BuildingDataset(Dataset):
                     'solar_radiation': solar_radiation
                 }
             }
-
-
-tmp = BuildingDataset('data/train.csv', 'data/building_info.csv', window_size=10, mode='train')
-check = DataLoader(tmp, batch_size=1, shuffle=True, num_workers=0)
-
-for data in check:
-    tmpp = 1
-    print('!')
