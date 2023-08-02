@@ -59,35 +59,43 @@ class BuildingDataset(Dataset):
 
         if self.mode == 'train':
             power_consumption = torch.tensor(window_data['전력소비량(kWh)'].values)
+            input_data = torch.stack([
+                building_num,
+                building_type,
+                total_area,
+                cooling_area,
+                solar_capacity,
+                ess_capacity,
+                pcs_capacity,
+                date_time,
+                temperature,
+                rainfall,
+                wind_speed,
+                humidity,
+                sunshine,
+                solar_radiation
+            ], dim=-1)  # Stacks the tensors along a new last dimension
             return {
-                'input': {
-                    'building_num': building_num,
-                    'building_type': building_type,
-                    'total_area': total_area,
-                    'cooling_area': cooling_area,
-                    'solar_capacity': solar_capacity,
-                    'ess_capacity': ess_capacity,
-                    'pcs_capacity': pcs_capacity,
-                    'date_time': date_time,
-                    'temperature': temperature,
-                    'rainfall': rainfall,
-                    'wind_speed': wind_speed,
-                    'humidity': humidity,
-                    'sunshine': sunshine,
-                    'solar_radiation': solar_radiation
-                },
+                'input': input_data,
                 'label': power_consumption
             }
         else:  # 'test' mode
+            input_data = torch.stack([
+                building_num,
+                building_type,
+                total_area,
+                cooling_area,
+                solar_capacity,
+                ess_capacity,
+                pcs_capacity,
+                date_time,
+                temperature,
+                rainfall,
+                wind_speed,
+                humidity,
+                sunshine,
+                solar_radiation
+            ], dim=-1)  # Stacks the tensors along a new last dimension
             return {
-                'input': {
-                    'building_num': building_num,
-                    'date_time': date_time,
-                    'temperature': temperature,
-                    'rainfall': rainfall,
-                    'wind_speed': wind_speed,
-                    'humidity': humidity,
-                    'sunshine': sunshine,
-                    'solar_radiation': solar_radiation
-                }
+                'input': input_data
             }
