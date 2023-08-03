@@ -56,7 +56,7 @@ if __name__ == "__main__":
 
     total_data = pd.concat([train_data, test_data], join='outer').reset_index(drop=True)
     total_data.sort_values(by=['건물번호', '일시'], inplace=True, ignore_index=True)
-    test_time = pd.date_range(test_start - pd.Timedelta(hours=(args.window_size-1)) , test_end, freq='H') #for compatibility
+    test_time = pd.date_range(test_start - pd.Timedelta(hours=(args.window_size)) , test_end, freq='H') #for compatibility
     test_data = total_data[total_data['일시'].isin(test_time)].reset_index(drop=True)
 
     train_time = pd.date_range(train_start + pd.Timedelta(hours=(args.window_size)) , train_end, freq='H') #args.window_size의 이후의 시간부터 loss function에 제공
@@ -106,7 +106,7 @@ if __name__ == "__main__":
 
         test_dataset = TestDataSetByBuilding(data=test_data, window_size=args.window_size)
         test_loader = DataLoader(
-            test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers
+            test_dataset, batch_size=1, shuffle=False, num_workers=args.num_workers
         ) #make test data loader
 
         prediction['answer'] += target_scaler.inverse_transform(trainer.test(test_loader)) #softmax applied output; accumulate test prediction of current fold model

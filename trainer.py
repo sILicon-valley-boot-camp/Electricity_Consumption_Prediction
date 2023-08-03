@@ -81,13 +81,15 @@ class Trainer():
         with torch.no_grad():
             result = []
             for batch in test_loader:
-                window_size = batch['y'].shape
                 y = batch['y'].to(self.device)
-                for index in range(batch['x'].shape[0] - batch['y'].shape):
-                    x = batch['x'][index:index+window_size].to(self.device)
-                    x = torch.concat([x, y], dim=-1)
+                y = torch.transpose(y, 0, 1).contiguous()
+                window_size = y.shape[0]
+                batch['x'] = batch['x'].squeeze(0)
+                for index in range(batch['x'].shape[0] - window_size):
+                    x = batch['x'][index:index+window_size, :].to(self.device)
+                    x = torch.concat([x, y], dim=-1).unsqueeze(0)
                  
                     output = self.model(x).detach()
                     result.append(output.cpu().item())
-                    y = torch.concat(y[1:], output)
-        return result
+                    y = torch.concat([y[1:, :], output.unsqueeze(0)], dim=0)
+        return np.array(result).reshape(-1, 1)

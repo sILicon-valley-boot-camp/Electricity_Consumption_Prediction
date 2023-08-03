@@ -52,7 +52,7 @@ class TestDataSetByBuilding(Dataset):
     
     def __getitem__(self, index):
         data = self.data[self.data['건물번호'] == index+1]
-        y = data['전력소비량(kWh)'].iloc[:self.window_size+1]
+        y = data['전력소비량(kWh)'].iloc[:self.window_size]
         x = data.drop(columns = self.drop + ['전력소비량(kWh)'])  # current time step - 10 ~ current time step, (when window_size=10)
 
         return {'x': torch.tensor(x.values, dtype=torch.float),
