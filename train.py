@@ -26,6 +26,7 @@ class Trainer():
                 inputs = batch['input'].float().to(self.device)
                 labels = batch['label'].float().to(self.device)
                 outputs = self.model(inputs)
+                labels = labels.unsqueeze(2)
                 loss = self.loss_fn(outputs, labels)
 
                 self.optimizer.zero_grad()
@@ -47,6 +48,7 @@ class Trainer():
                     inputs = batch['input'].float().to(self.device)
                     labels = batch['label'].float().to(self.device)
                     outputs = self.model(inputs)
+                    labels = labels.unsqueeze(2)
                     loss = self.loss_fn(outputs, labels)
                     running_valid_loss += loss.item() * inputs.size(0)
                     
