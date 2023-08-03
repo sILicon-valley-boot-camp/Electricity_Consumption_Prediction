@@ -37,7 +37,7 @@ def run_train(dataset, model, lr, epochs, batch_size, logger, device):
     # loss_function = MAPE
     # loss_function = SMAPE
 
-    trainer = train.Trainer(train_loader, valid_loader, model, loss_function, optimizer, epochs, logger, device)
+    trainer = train.Trainer(train_loader, valid_loader, model, loss_function, optimizer, epochs, device)
     trainer.train(logger)
 
 def run_test(dataset, model, batch_size, logger, device):
@@ -48,7 +48,7 @@ def run_test(dataset, model, batch_size, logger, device):
     # loss_function = MAPE
     # loss_function = SMAPE
 
-    tester = test.Tester(test_loader, model, loss_function, logger, device)
+    tester = test.Tester(test_loader, model, loss_function, device)
     tester.test(logger)
 
 if __name__ == "__main__":
