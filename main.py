@@ -4,6 +4,7 @@ import torch
 from torch.utils.data import DataLoader, random_split
 from torch import optim
 import logging
+import time
 
 # Local application imports
 from config import get_args
@@ -58,13 +59,17 @@ if __name__ == "__main__":
     model = prepare_model(args.input_dim, args.hidden_dim, args.output_dim, args.num_layers, device)
 
     # Set up logging
+    current_time = time.strftime("%Y-%m-%d-%H-%M-%S")
+    log_filename = f"log_{current_time}.txt"
+
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
-    handler = logging.FileHandler('training_log.txt')
+    handler = logging.FileHandler(log_filename)
     handler.setLevel(logging.INFO)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     handler.setFormatter(formatter)
     logger.addHandler(handler)
+    logger.info("This is a new log file.")
 
     if args.mode == 'train':
         lr = args.lr
