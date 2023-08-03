@@ -40,3 +40,20 @@ class TestDataSet(Dataset):
         x = data.drop(columns = self.drop)  # current time step - 10 ~ current time step, (when window_size=10)
 
         return {'x': torch.tensor(x.values, dtype=torch.float)}
+    
+class TestDataSetByBuilding(Dataset):
+    def __init__(self, data, window_size):
+        self.data = data
+        self.window_size = window_size
+        self.drop = ['num_date_time', '건물번호', '일시']
+
+    def __len__(self):
+        return 100
+    
+    def __getitem__(self, index):
+        data = self.data[self.data['건물번호'] == index+1]
+        y = data['전력소비량(kWh)'].iloc[:self.window_size+1]
+        x = data.drop(columns = self.drop + ['전력소비량(kWh)'])  # current time step - 10 ~ current time step, (when window_size=10)
+
+        return {'x': torch.tensor(x.values, dtype=torch.float),
+                'y': torch.tensor(y.values, dtype=torch.float)}

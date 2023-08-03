@@ -13,7 +13,7 @@ from config import get_args
 from trainer import Trainer
 from lr_scheduler import get_sch
 from utils import seed_everything
-from data import DataSet, TestDataSet
+from data import DataSet, TestDataSetByBuilding
 
 if __name__ == "__main__":
     args = get_args()
@@ -54,7 +54,7 @@ if __name__ == "__main__":
 
     test_data[scaling_col] = data_scaler.transform(test_data[scaling_col])
 
-    total_data = pd.concat([train_data, test_data], join='inner').reset_index(drop=True)
+    total_data = pd.concat([train_data, test_data], join='outer').reset_index(drop=True)
     total_data.sort_values(by=['건물번호', '일시'], inplace=True, ignore_index=True)
     test_time = pd.date_range(test_start - pd.Timedelta(hours=(args.window_size-1)) , test_end, freq='H') #for compatibility
     test_data = total_data[total_data['일시'].isin(test_time)].reset_index(drop=True)
@@ -104,7 +104,7 @@ if __name__ == "__main__":
             train_loader, valid_loader, model, loss_fn, optimizer, scheduler, device, args.patience, args.epochs, fold_result_path, fold_logger, len(train_dataset), len(valid_dataset))
         trainer.train() #start training
 
-        test_dataset = TestDataSet(data=test_data, window_size=args.window_size, test_start=test_start, test_end=test_end)
+        test_dataset = TestDataSetByBuilding(data=test_data, window_size=args.window_size)
         test_loader = DataLoader(
             test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers
         ) #make test data loader
