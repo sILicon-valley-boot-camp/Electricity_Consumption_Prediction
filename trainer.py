@@ -4,6 +4,8 @@ import torch
 import numpy as np
 from tqdm import tqdm
 
+from utils import smape
+
 class Trainer():
     def __init__(self, train_loader, valid_loader, model, loss_fn, optimizer, scheduler, device, patience, epochs, result_path, fold_logger, len_train, len_valid):
         self.train_loader = train_loader
@@ -23,11 +25,11 @@ class Trainer():
     def train(self):
         best = np.inf
         for epoch in range(1,self.epochs+1):
-            loss_train = self.train_step()
-            loss_val = self.valid_step()
+            loss_train, smape_train = self.train_step()
+            loss_val, smape_valid = self.valid_step()
             self.scheduler.step()
 
-            self.logger.info(f'Epoch {str(epoch).zfill(5)}: t_loss:{loss_train:.3f} v_loss:{loss_val:.3f}')
+            self.logger.info(f'Epoch {str(epoch).zfill(5)}: t_loss:{loss_train:.3f} t_smape:{smape_train:.3f} v_loss:{loss_val:.3f} v_smape:{smape_valid:.3f}')
 
             if loss_val < best:
                 best = loss_val
@@ -54,8 +56,9 @@ class Trainer():
             self.optimizer.step()
 
             total_loss += loss.item() * x.shape[0]
+            total_smape = smape(y, output.detach().cpu().numpy()) * x.shape[0]
         
-        return total_loss/self.len_train
+        return total_loss/self.len_train, total_smape/self.len_train
     
     def valid_step(self):
         self.model.eval()
@@ -68,8 +71,9 @@ class Trainer():
                 loss = self.loss_fn(output, y)
 
                 total_loss += loss.item() * x.shape[0]
+                total_smape = smape(y, output.detach().cpu().numpy()) * x.shape[0]
                 
-        return total_loss/self.len_valid
+        return total_loss/self.len_valid, total_smape/self.len_valid
     
     def test(self, test_loader):
         self.model.load_state_dict(torch.load(self.best_model_path))

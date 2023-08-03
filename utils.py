@@ -12,3 +12,8 @@ def seed_everything(seed: int):
     os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
     torch.use_deterministic_algorithms(True)
     torch.backends.cudnn.benchmark = True
+
+def smape(true, pred):
+    v = 2 * abs(pred - true) / (abs(pred) + abs(true))
+    output = np.mean(v) * 100
+    return output
