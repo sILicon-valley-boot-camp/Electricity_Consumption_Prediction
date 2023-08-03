@@ -75,23 +75,18 @@ class Trainer():
                 
         return total_loss/self.len_valid, total_smape/self.len_valid
     
-    def inference(self, test_loader):
+    def inference(self, test_loader, window_size):
         self.model.load_state_dict(torch.load(self.best_model_path))
         self.model.eval()
         with torch.no_grad():
             result = []
             for batch in test_loader:
-                y = batch['y'].to(self.device)
-                y = torch.transpose(y, 0, 1).contiguous()
-                window_size = y.shape[0]
                 batch['x'] = batch['x'].squeeze(0)
                 for index in range(batch['x'].shape[0] - window_size):
                     x = batch['x'][index:index+window_size, :].to(self.device)
-                    x = torch.concat([x, y], dim=-1).unsqueeze(0)
                  
                     output = self.model(x).detach()
                     result.append(output.cpu().item())
-                    y = torch.concat([y[1:, :], output.unsqueeze(0)], dim=0)
         return np.array(result).reshape(-1, 1)
     
     def test(self, test_loader): #for making predictions on validation set, generating input for stacking Ensemble
