@@ -116,9 +116,5 @@ if __name__ == "__main__":
         #may need testing with trainer.inference()
         stackking_input.to_csv(os.path.join(result_path, f'for_stacking_input.csv'), index=False)
 
-        '''np.savez_compressed(os.path.join(fold_result_path, 'test_prediction'), trainer.test(test_loader))
-        np.savez_compressed(os.path.join(fold_result_path, 'valid_prediction'), trainer.test(valid_loader))
-        np.savez(os.path.join(fold_result_path, 'valid_index'), valid_index)''' # case when output size is big
-
-'''prediction['label'] = np.argmax(test_result, axis=-1) #use the most likely results as my final prediction
-prediction.drop(columns=output_index).to_csv(os.path.join(result_path, 'prediction.csv'), index=False)''' #classification
+prediction['answer'] = prediction['answer'] / 10 #use the most likely results as my final prediction
+prediction.to_csv(os.path.join(result_path, 'prediction.csv'), index=False)
