@@ -1,6 +1,7 @@
 import os
 import logging
 import pandas as pd
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import StratifiedKFold
 
 import torch
@@ -37,10 +38,21 @@ if __name__ == "__main__":
     train_start = min(train_data['일시'])
     train_end = max(train_data['일시'])
 
+    output_index = '전력소비량(kWh)'
+    scaling_col = set(train_data.columns) ^ {'num_date_time', '건물번호', '일시', '전력소비량(kWh)'}
+    input_size = len(scaling_col)+1
+    data_scaler = MinMaxScaler()
+    target_scaler = MinMaxScaler()
+    
+    train_data[scaling_col] = data_scaler.fit_transform(train_data[scaling_col])
+    train_data[output_index] = target_scaler.fit_transform(train_data[output_index])
+
     test_data = pd.read_csv(args.test)
     test_data['일시'] = pd.to_datetime(test_data['일시'])
     test_start = min(test_data['일시'])
     test_end = max(test_data['일시'])
+
+    test_data[scaling_col] = data_scaler.transform(test_data[scaling_col])
 
     total_data = pd.concat([train_data, test_data], join='inner').reset_index(drop=True)
     total_data.sort_values(by=['건물번호', '일시'], inplace=True, ignore_index=True)
@@ -49,9 +61,6 @@ if __name__ == "__main__":
 
     train_time = pd.date_range(train_start + pd.Timedelta(hours=(args.window_size)) , train_end, freq='H') #args.window_size의 이후의 시간부터 loss function에 제공
     train_target_data = train_data[train_data['일시'].isin(train_time)] #train_start time_stamp's data will not be used(except electricity consumption) 
-
-    input_size = train_data.shape[1]-2
-    output_index = '전력소비량(kWh)'
 
     prediction = pd.read_csv(args.submission)
     stackking_input = pd.DataFrame(columns = [output_index], index=range(len(train_data))) #dataframe for saving OOF predictions
@@ -100,10 +109,10 @@ if __name__ == "__main__":
             test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers
         ) #make test data loader
 
-        prediction['answer'] += trainer.test(test_loader) #softmax applied output; accumulate test prediction of current fold model
+        prediction['answer'] += target_scaler.inverse_transform(trainer.test(test_loader)) #softmax applied output; accumulate test prediction of current fold model
         prediction.to_csv(os.path.join(result_path, 'sum.csv'), index=False) 
         
-        stackking_input.loc[valid_index, output_index] = trainer.test(valid_loader) #use the validation data(hold out dataset) to make input for Stacking Ensemble model(out of fold prediction)
+        stackking_input.loc[valid_index, output_index] = target_scaler.inverse_transform(trainer.test(valid_loader)) #use the validation data(hold out dataset) to make input for Stacking Ensemble model(out of fold prediction)
         stackking_input.to_csv(os.path.join(result_path, f'for_stacking_input.csv'), index=False)
 
         '''np.savez_compressed(os.path.join(fold_result_path, 'test_prediction'), trainer.test(test_loader))
