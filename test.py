@@ -8,7 +8,7 @@ class Tester():
         self.predictions = []
         self.device = device
 
-    def test(self):
+    def test(self, logger):
         # Testing Phase
         self.model.eval()
         with torch.no_grad():
