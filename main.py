@@ -39,13 +39,13 @@ if __name__ == "__main__":
     train_end = max(train_data['일시'])
 
     output_index = '전력소비량(kWh)'
-    scaling_col = set(train_data.columns) ^ {'num_date_time', '건물번호', '일시', '전력소비량(kWh)'}
+    scaling_col = list(set(train_data.columns) - {'num_date_time', '건물번호', '일시', '전력소비량(kWh)'})
     input_size = len(scaling_col)+1
     data_scaler = MinMaxScaler()
     target_scaler = MinMaxScaler()
     
     train_data[scaling_col] = data_scaler.fit_transform(train_data[scaling_col])
-    train_data[output_index] = target_scaler.fit_transform(train_data[output_index])
+    train_data[output_index] = target_scaler.fit_transform(train_data[output_index].values.reshape(-1, 1))
 
     test_data = pd.read_csv(args.test)
     test_data['일시'] = pd.to_datetime(test_data['일시'])
@@ -88,7 +88,7 @@ if __name__ == "__main__":
         train_dataset = DataSet(data=train_data, label=output_index, window_size=args.window_size, target_index=kfold_train_index)
         valid_dataset = DataSet(data=train_data, label=output_index, window_size=args.window_size, target_index=kfold_valid_index)
 
-        model = getattr(models , args.model)(args, input_size).to(device)
+        model = getattr(models , 'TimeSeriesModel')(args, input_size).to(device)
         loss_fn = nn.MSELoss()
         optimizer = optim.Adam(model.parameters(), lr=args.lr)
         scheduler = get_sch(args.scheduler)(optimizer)
