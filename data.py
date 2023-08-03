@@ -7,7 +7,7 @@ class DataSet(Dataset):
     def __init__(self, data, label, window_size, target_index):
         self.label = label
         self.data = data.sort_values(by=['건물번호', '일시'], ignore_index=True)
-        self.drop = ['건물번호', '일시']
+        self.drop = ['num_date_time', '건물번호', '일시']
         self.window_size = window_size
         self.target_index = target_index
 
@@ -30,7 +30,7 @@ class TestDataSet(Dataset):
         self.window_size = window_size-1
         target_time = pd.date_range(test_start , test_end, freq='H')
         self.target_index = self.data[self.data['일시'].isin(target_time)].index
-        self.drop = ['건물번호', '일시']
+        self.drop = ['num_date_time', '건물번호', '일시']
 
     def __len__(self):
         return len(self.target_index)
