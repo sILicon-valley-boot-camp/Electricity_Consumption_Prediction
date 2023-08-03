@@ -21,12 +21,13 @@ class PositionalEncoding(nn.Module):
 class TimeSeriesTransformerEncoder(nn.Module):
     def __init__(self, args, feature_size):
         super().__init__()
-        self.transformer_pooling = args.transformer_pooling 
+        self.transformer_pooling = args.pooling 
         self.pos_encoder = PositionalEncoding(feature_size)
         self.use_cls = False
         if args.transformer_pooling== 'first':
             self.use_cls = True
             self.cls_token = nn.Parameter(torch.zeros(1, 1, feature_size))
+            
         self.encoder_layer = nn.TransformerEncoderLayer(d_model=feature_size, nhead=args.n_head, dropout=args.transformer_dropout) #(seq, bs, feat)
         self.transformer_encoder = nn.TransformerEncoder(self.encoder_layer, num_layers=args.num_layers)
                 
@@ -58,14 +59,3 @@ class TimeSeriesTransformerEncoder(nn.Module):
         mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)
         mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
         return mask
-    
-class TimeSeriesTransformer(nn.Module):
-    def __init__(self, args, feature_size):
-        super().__init__()
-        self.transformer_encoder = TimeSeriesTransformerEncoder(args, feature_size)
-        self.linear = nn.Linear(feature_size, 1)
-
-    def forward(self, src):
-        src = torch.transpose(src, 0, 1).contiguous() # change to (seq, bs, feat) shape
-        out = self.transformer_encoder(src) # return (bs, feat)
-        return self.linear(out).squeeze(1)
