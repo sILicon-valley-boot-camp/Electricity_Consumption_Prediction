@@ -40,7 +40,7 @@ if __name__ == "__main__":
 
     output_index = '전력소비량(kWh)'
     scaling_col = list(set(train_data.columns) - {'num_date_time', '건물번호', '일시', '전력소비량(kWh)'})
-    input_size = len(scaling_col)+1
+    input_size = len(scaling_col)
     data_scaler = MinMaxScaler()
     target_scaler = MinMaxScaler()
     
