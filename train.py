@@ -1,6 +1,8 @@
 import torch
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+from tensorboardX import SummaryWriter
+
 
 class Trainer():
     def __init__(self, train_loader, valid_loader, model, loss_fn, optimizer, epochs, device):
@@ -11,6 +13,9 @@ class Trainer():
         self.optimizer = optimizer
         self.epochs = epochs
         self.device = device
+
+        self.writer = SummaryWriter('runs/experiment_1')  # Change this to your preferred log directory.
+
 
     def train(self):
         train_loss_values = []
@@ -34,8 +39,10 @@ class Trainer():
                 self.optimizer.step()
 
                 running_loss += loss.item() * inputs.size(0)
+                self.writer.add_scalar('Loss/train', loss.item(), epoch * len(self.train_loader) + i)
                 progress_bar.set_description(f'Epoch {epoch+1}/{self.epochs} Loss: {loss.item():.4f}')
 
+            self.writer.close()
             epoch_loss = running_loss / len(self.train_loader.dataset)
             train_loss_values.append(epoch_loss)
             print(f'\nTrain Epoch {epoch+1}/{self.epochs}, Loss: {epoch_loss:.4f}')
