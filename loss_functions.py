@@ -13,5 +13,5 @@ def MAPE(pred, true):
 
 def SMAPE(pred, true):
     v = 2 * abs(true - pred) / (abs(true) + abs(pred))
-    loss = np.mean(v) * 100
+    loss = v.mean() * 100
     return loss
