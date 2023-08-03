@@ -1,11 +1,17 @@
 import pandas as pd
 import torch
+import numpy as np
 from torch.utils.data import Dataset, DataLoader
+from sklearn.preprocessing import MinMaxScaler
+
 
 class BuildingDataset(Dataset):
     def __init__(self, csv_path, info_path, window_size=10, mode='train'):
         self.data = pd.read_csv(csv_path)
         self.info = pd.read_csv(info_path)
+
+        self.scaler = MinMaxScaler()  # Min-Max Scaler to normalize features
+
         self.data['강수량(mm)'].fillna(0, inplace=True)  # 강수량의 누락된 값을 0으로 채움
         self.data['풍속(m/s)'].interpolate()  # 풍속의 누락된 값을 선형보간으로 채움
         self.data['습도(%)'].interpolate()  # 습도의 누락된 값을 선형보간으로 채움
@@ -25,10 +31,24 @@ class BuildingDataset(Dataset):
         self.window_size = window_size
         self.mode = mode
         self.building_data = []  # 각 건물의 데이터를 저장할 리스트
+        self.building_nums = pd.factorize(self.data['건물번호'])[0]  # 각 건물번호를 고유한 정수 인덱스로 변환
+        self.building_types = pd.factorize(self.data['건물유형'])[0]  # 각 건물유형을 고유한 정수 인덱스로 변환
+
+        continuous_columns = ['연면적(m2)', '냉방면적(m2)', '태양광용량(kW)', 'ESS저장용량(kWh)', 
+                                  'PCS용량(kW)', '기온(C)', '강수량(mm)', '풍속(m/s)', '습도(%)', 
+                                  '일조(hr)', '일사(MJ/m2)']
 
         # 각 건물의 데이터를 구분하여 저장
         for building_num in self.data['건물번호'].unique():
-            building_data = self.data[self.data['건물번호'] == building_num]
+            building_data = self.data[self.data['건물번호'] == building_num].copy()
+            building_data[continuous_columns] = self.scaler.fit_transform(building_data[continuous_columns])
+
+            building_num_index = np.where(self.data['건물번호'].unique() == building_num)[0][0]
+            building_type = self.data[self.data['건물번호'] == building_num]['건물유형'].iloc[0]
+            building_type_index = np.where(self.data['건물유형'].unique() == building_type)[0][0]
+
+            building_data['건물번호'] = building_num_index
+            building_data['건물유형'] = building_type_index
             self.building_data.append(building_data)
 
     def __len__(self):
