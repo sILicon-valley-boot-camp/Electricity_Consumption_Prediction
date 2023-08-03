@@ -109,10 +109,11 @@ if __name__ == "__main__":
             test_dataset, batch_size=1, shuffle=False, num_workers=args.num_workers
         ) #make test data loader
 
-        prediction['answer'] += target_scaler.inverse_transform(trainer.test(test_loader)) #softmax applied output; accumulate test prediction of current fold model
+        prediction['answer'] += target_scaler.inverse_transform(trainer.inference(test_loader)).squeeze(-1)
         prediction.to_csv(os.path.join(result_path, 'sum.csv'), index=False) 
         
-        stackking_input.loc[valid_index, output_index] = target_scaler.inverse_transform(trainer.test(valid_loader)) #use the validation data(hold out dataset) to make input for Stacking Ensemble model(out of fold prediction)
+        stackking_input.loc[valid_index, output_index] = target_scaler.inverse_transform(trainer.test(valid_loader)).squeeze(-1) #use the validation data(hold out dataset) to make input for Stacking Ensemble model(out of fold prediction)
+        #may need testing with trainer.inference()
         stackking_input.to_csv(os.path.join(result_path, f'for_stacking_input.csv'), index=False)
 
         '''np.savez_compressed(os.path.join(fold_result_path, 'test_prediction'), trainer.test(test_loader))

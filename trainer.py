@@ -75,7 +75,7 @@ class Trainer():
                 
         return total_loss/self.len_valid, total_smape/self.len_valid
     
-    def test(self, test_loader):
+    def inference(self, test_loader):
         self.model.load_state_dict(torch.load(self.best_model_path))
         self.model.eval()
         with torch.no_grad():
@@ -93,3 +93,15 @@ class Trainer():
                     result.append(output.cpu().item())
                     y = torch.concat([y[1:, :], output.unsqueeze(0)], dim=0)
         return np.array(result).reshape(-1, 1)
+    
+    def test(self, test_loader): #for making predictions on validation set, generating input for stacking Ensemble
+            self.model.load_state_dict(torch.load(self.best_model_path))
+            self.model.eval()
+            with torch.no_grad():
+                result = []
+                for batch in test_loader:
+                    x = batch['x'].to(self.device)
+                    output = self.model(x).detach().cpu().numpy()
+                    result.append(output)
+
+            return np.concatenate(result,axis=0).reshape(-1, 1)
