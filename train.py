@@ -25,11 +25,8 @@ class Trainer():
             progress_bar = tqdm(enumerate(self.train_loader), total=len(self.train_loader))
             for i, batch in progress_bar:
                 inputs = batch['input'].float().to(self.device)
-                print(torch.isnan(inputs).any())
                 labels = batch['label'].float().to(self.device)
-                print(torch.isnan(labels).any())
                 outputs = self.model(inputs)
-                print(torch.isnan(outputs).any())
                 labels = labels.unsqueeze(2)
                 loss = self.loss_fn(outputs, labels)
 

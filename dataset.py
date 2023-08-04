@@ -13,8 +13,8 @@ class BuildingDataset(Dataset):
         self.scaler = MinMaxScaler()  # Min-Max Scaler to normalize features
 
         self.data['강수량(mm)'].fillna(0, inplace=True)  # 강수량의 누락된 값을 0으로 채움
-        self.data['풍속(m/s)'].interpolate()  # 풍속의 누락된 값을 선형보간으로 채움
-        self.data['습도(%)'].interpolate()  # 습도의 누락된 값을 선형보간으로 채움
+        self.data['풍속(m/s)'].interpolate(inplace=True)  # 풍속의 누락된 값을 선형보간으로 채움
+        self.data['습도(%)'].interpolate(inplace=True)  # 습도의 누락된 값을 선형보간으로 채움
         self.data['일조(hr)'].fillna(self.data['일조(hr)'].mean(), inplace=True)  # 일조의 누락된 값을 평균값으로 채움
         self.data['일사(MJ/m2)'].fillna(self.data['일사(MJ/m2)'].mean(), inplace=True)  # 일사의 누락된 값을 평균값으로 채움
 
@@ -129,4 +129,10 @@ class BuildingDataset(Dataset):
             return {
                 'input': input_data
             }
-        
+    
+# dataset = BuildingDataset('data/train.csv', 'data/building_info.csv', window_size=24, mode='train')
+# loader = DataLoader(dataset, batch_size=32, shuffle=True)
+
+# for batch in loader:
+#     tmp = 1
+#     print('!')
