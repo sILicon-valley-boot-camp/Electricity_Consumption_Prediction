@@ -59,7 +59,6 @@ class BuildingDataset(Dataset):
 
 
     def __getitem__(self, idx):
-        # window를 사용하여 데이터를 추출
         window_data = None  # Set initial value
         for building_data in self.building_data:
             if idx < len(building_data) - self.window_size + 1:
@@ -71,7 +70,6 @@ class BuildingDataset(Dataset):
         if window_data is None:
             raise IndexError('The given index is out of bounds.')
 
-        # 각 열을 PyTorch 텐서로 변환
         building_num = torch.tensor(window_data['건물번호'].values)
         building_type = torch.tensor(window_data['건물유형'].astype('category').cat.codes.values)  # 건물유형을 카테고리 코드로 변환
         total_area = torch.tensor(window_data['연면적(m2)'].values)
