@@ -21,6 +21,7 @@ def args_for_train(parser):
 def args_for_test(parser):
     parser.add_argument('--data_path', type=str, default='data/test.csv', help='data path')
     parser.add_argument('--info_path', type=str, default='data/building_info.csv', help='info path')
+    parser.add_argument('--model_path', type=str, default='model.pt', help='model path')
 
     parser.add_argument('--input_dim', type=int, default=14, help='input dimension')
     parser.add_argument('--hidden_dim', type=int, default=128, help='hidden dimension')

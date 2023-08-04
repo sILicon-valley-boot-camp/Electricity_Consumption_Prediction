@@ -44,10 +44,10 @@ def run_train(dataset, model, lr, epochs, batch_size, logger, device):
 def run_test(dataset, model, batch_size, logger, device):
     test_loader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
 
-    loss_function = MSE
+    # loss_function = MSE
     # loss_function = MAE
     # loss_function = MAPE
-    # loss_function = SMAPE
+    loss_function = SMAPE
 
     tester = test.Tester(test_loader, model, loss_function, device)
     tester.test(logger)
@@ -72,6 +72,7 @@ if __name__ == "__main__":
     logger.info("This is a new log file.")
 
     if args.mode == 'train':
+        model = prepare_model(args.input_dim, args.hidden_dim, args.output_dim, args.num_layers, device)
         lr = args.lr
         epochs = args.epochs
         dataset = BuildingDataset(args.data_path, args.info_path, args.window_size, args.mode)
@@ -79,6 +80,9 @@ if __name__ == "__main__":
         run_train(dataset, model, lr, epochs, args.batch_size, logger, device)
 
     else: # args.mode == 'test'
+        model = prepare_model(args.input_dim, args.hidden_dim, args.output_dim, args.num_layers, device)
+        weights = torch.load(args.model_path)
+        model.load_state_dict(weights)
         dataset = BuildingDataset(args.data_path, args.info_path, args.window_size, args.mode)
 
         run_test(dataset, model, args.batch_size,logger, device)
