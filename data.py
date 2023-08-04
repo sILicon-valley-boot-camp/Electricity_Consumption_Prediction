@@ -8,7 +8,7 @@ class DataSet(Dataset):
         self.label = label
         self.data = data.sort_values(by=['건물번호', '일시'], ignore_index=True)
         self.drop = ['num_date_time', '건물번호', '일시']
-        self.window_size = window_size
+        self.window_size = window_size-1
         self.target_index = target_index
 
     def __len__(self):
@@ -20,7 +20,7 @@ class DataSet(Dataset):
         x = data.drop(columns = [self.label] + self.drop)  # current time step - 10 ~ current time step, (when window_size=10)
 
         return {'x': torch.tensor(x.values, dtype=torch.float), #(window_size, feat_dim)
-                'y': torch.tensor(y, dtype=torch.float)} #(window_size+1, )
+                'y': torch.tensor(y, dtype=torch.float)} 
     
 class TestDataSet(Dataset):
     def __init__(self, data, window_size, test_start, test_end):
