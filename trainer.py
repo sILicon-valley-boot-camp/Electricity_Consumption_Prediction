@@ -82,8 +82,8 @@ class Trainer():
             result = []
             for batch in test_loader:
                 batch['x'] = batch['x'].squeeze(0)
-                for index in range(batch['x'].shape[0] - window_size):
-                    x = batch['x'][index:index+window_size, :].to(self.device)
+                for index in range(batch['x'].shape[0] - (window_size-1)):
+                    x = batch['x'][index:index+window_size, :].to(self.device).unsqueeze(0)
                  
                     output = self.model(x).detach()
                     result.append(output.cpu().item())
