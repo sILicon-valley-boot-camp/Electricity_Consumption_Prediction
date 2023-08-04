@@ -15,7 +15,7 @@ class RNNModel(nn.Module):
         h0 = torch.zeros([self.num_layers, x.size(0), self.hidden_size], dtype = torch.float32).to(x.device) 
 
         out, _ = self.rnn(x, h0)  
-        out = self.fc(out)  # Changed here. Apply FC to all sequence steps.
+        out = self.fc(out)
 
         return out
 
@@ -34,7 +34,7 @@ class LSTMModel(nn.Module):
         c0 = torch.zeros([self.num_layers, x.size(0), self.hidden_size], dtype = torch.float32).to(x.device) 
 
         out, _ = self.lstm(x, (h0, c0))  
-        out = self.fc(out)  # Apply FC to all sequence steps
+        out = self.fc(out)
 
         return out
 
@@ -52,6 +52,6 @@ class GRUModel(nn.Module):
         h0 = torch.zeros([self.num_layers, x.size(0), self.hidden_size], dtype = torch.float32).to(x.device) 
 
         out, _ = self.gru(x, h0)  
-        out = self.fc(out)  # Apply FC to all sequence steps
+        out = self.fc(out)
 
         return out
