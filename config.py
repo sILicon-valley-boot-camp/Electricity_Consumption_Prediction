@@ -11,7 +11,7 @@ def args_for_train(parser):
     parser.add_argument('--data_path', type=str, default='data/train.csv', help='data path')
     parser.add_argument('--info_path', type=str, default='data/building_info.csv', help='info path')
     parser.add_argument('--epochs', type=int, default=1000, help='max epochs')
-    parser.add_argument('--lr', type=float, default=1e-8, help='learning rate for the optimizer')
+    parser.add_argument('--lr', type=float, default=1e-5, help='learning rate for the optimizer')
 
     parser.add_argument('--input_dim', type=int, default=14, help='input dimension')
     parser.add_argument('--hidden_dim', type=int, default=128, help='hidden dimension')
