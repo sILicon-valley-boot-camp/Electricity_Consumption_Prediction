@@ -1,7 +1,6 @@
+import os
 import torch
-import matplotlib.pyplot as plt
 from tqdm import tqdm
-
 
 class Trainer():
     def __init__(self, train_loader, valid_loader, model, loss_fn, optimizer, epochs, device):
@@ -12,58 +11,64 @@ class Trainer():
         self.optimizer = optimizer
         self.epochs = epochs
         self.device = device
+        self.result_dir = self.get_result_dir()
 
-    def train(self, logger):
-        train_loss_values = []
-        valid_loss_values = []
+    def get_result_dir(self):
+        existing_dirs = [dname for dname in os.listdir() if "result" in dname]
+        dir_count = len(existing_dirs)
+        result_dir = f'result{dir_count + 1}'
+        os.mkdir(result_dir)
+        return result_dir
 
-        for epoch in range(self.epochs):
-            running_loss = 0.0
+    def train_one_epoch(self, epoch, logger):
+        running_loss = 0.0
+        self.model.train()
+        progress_bar = tqdm(enumerate(self.train_loader), total=len(self.train_loader))
 
-            # Training Phase
-            self.model.train()
-            progress_bar = tqdm(enumerate(self.train_loader), total=len(self.train_loader))
-            for i, batch in progress_bar:
+        for i, batch in progress_bar:
+            inputs = batch['input'].float().to(self.device)
+            labels = batch['label'].float().to(self.device)
+            outputs = self.model(inputs)
+            labels = labels.unsqueeze(2)
+            loss = self.loss_fn(outputs, labels)
+            self.optimizer.zero_grad()
+            loss.backward()
+            self.optimizer.step()
+            running_loss += loss.item() * inputs.size(0)
+            progress_bar.set_description(f'Epoch {epoch+1}/{self.epochs} Loss: {loss.item():.4f}')
+            logger.info(f'Epoch {epoch+1} Batch {i+1} Loss: {loss.item():.4f}')
+
+        return running_loss / len(self.train_loader.dataset)
+
+    def validate(self):
+        running_valid_loss = 0.0
+        self.model.eval()
+
+        with torch.no_grad():
+            for batch in self.valid_loader:
                 inputs = batch['input'].float().to(self.device)
                 labels = batch['label'].float().to(self.device)
                 outputs = self.model(inputs)
                 labels = labels.unsqueeze(2)
                 loss = self.loss_fn(outputs, labels)
+                running_valid_loss += loss.item() * inputs.size(0)
 
-                self.optimizer.zero_grad()
-                loss.backward()
-                self.optimizer.step()
+        return running_valid_loss / len(self.valid_loader.dataset)
 
-                running_loss += loss.item() * inputs.size(0)
-                progress_bar.set_description(f'Epoch {epoch+1}/{self.epochs} Loss: {loss.item():.4f}')
-                logger.info(f'Epoch {epoch+1} Batch {i+1} Loss: {loss.item():.4f}')
+    def train(self, logger):
+        train_loss_values = []
+        valid_loss_values = []
+        best_valid_loss = float('inf')
 
-            epoch_loss = running_loss / len(self.train_loader.dataset)
-            train_loss_values.append(epoch_loss)
-            print(f'\nTrain Epoch {epoch+1}/{self.epochs}, Loss: {epoch_loss:.4f}')
+        for epoch in range(self.epochs):
+            train_loss = self.train_one_epoch(epoch, logger)
+            train_loss_values.append(train_loss)
+            print(f'\nTrain Epoch {epoch+1}/{self.epochs}, Loss: {train_loss:.4f}')
+            valid_loss = self.validate()
+            valid_loss_values.append(valid_loss)
+            print(f'Validation Loss: {valid_loss:.4f}\n')
+            torch.save(self.model.state_dict(), f'{self.result_dir}/model_weights_epoch_{epoch+1}.pth')
 
-            # Validation Phase
-            self.model.eval()
-            with torch.no_grad():
-                running_valid_loss = 0.0
-                for batch in self.valid_loader:
-                    inputs = batch['input'].float().to(self.device)
-                    labels = batch['label'].float().to(self.device)
-                    outputs = self.model(inputs)
-                    labels = labels.unsqueeze(2)
-                    loss = self.loss_fn(outputs, labels)
-                    running_valid_loss += loss.item() * inputs.size(0)
-                    
-                valid_loss = running_valid_loss / len(self.valid_loader.dataset)
-                valid_loss_values.append(valid_loss)
-                print(f'Validation Loss: {valid_loss:.4f}\n')
-
-        plt.figure(figsize=(10, 5))
-        plt.plot(range(1, self.epochs + 1), train_loss_values, color='blue', label='Training Loss', marker='o', linestyle='dashed', linewidth=2, markersize=6)
-        plt.plot(range(1, self.epochs + 1), valid_loss_values, color='red', label='Validation Loss', marker='o', linestyle='dashed', linewidth=2, markersize=6)
-        plt.title('Training and Validation Loss over Epochs')
-        plt.xlabel('Epochs')
-        plt.ylabel('Loss')
-        plt.legend()
-        plt.grid(True)
-        plt.show()
+            if valid_loss < best_valid_loss:
+                best_valid_loss = valid_loss
+                torch.save(self.model.state_dict(), f'{self.result_dir}/best_model_weights.pth')
