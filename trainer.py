@@ -46,6 +46,7 @@ class Trainer():
         self.model.train()
 
         total_loss = 0
+        total_smape = 0
         for batch in tqdm(self.train_loader, file=sys.stdout): #tqdm output will not be written to logger file(will only written to stdout)
             x, y = batch['x'].to(self.device), batch['y'].to(self.device)
 
@@ -56,7 +57,7 @@ class Trainer():
             self.optimizer.step()
 
             total_loss += loss.item() * x.shape[0]
-            total_smape = smape(y.detach().cpu().numpy(), output.detach().cpu().numpy()) * x.shape[0]
+            total_smape += smape(y.detach().cpu().numpy(), output.detach().cpu().numpy()) * x.shape[0]
         
         return total_loss/self.len_train, total_smape/self.len_train
     
@@ -64,6 +65,7 @@ class Trainer():
         self.model.eval()
         with torch.no_grad():
             total_loss = 0
+            total_smape = 0
             for batch in self.valid_loader:
                 x, y = batch['x'].to(self.device), batch['y'].to(self.device)
 
@@ -71,7 +73,7 @@ class Trainer():
                 loss = self.loss_fn(output, y)
 
                 total_loss += loss.item() * x.shape[0]
-                total_smape = smape(y.detach().cpu().numpy(), output.detach().cpu().numpy()) * x.shape[0]
+                total_smape += smape(y.detach().cpu().numpy(), output.detach().cpu().numpy()) * x.shape[0]
                 
         return total_loss/self.len_valid, total_smape/self.len_valid
     
