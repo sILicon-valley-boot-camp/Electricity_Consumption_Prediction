@@ -4,32 +4,32 @@ import numpy as np
 from torch.utils.data import Dataset, DataLoader
 from sklearn.preprocessing import MinMaxScaler
 
+def handle_nan(data):
+    data['강수량(mm)'].fillna(0, inplace=True)  # 강수량의 누락된 값을 0으로 채움
+    data['풍속(m/s)'].interpolate(inplace=True)  # 풍속의 누락된 값을 선형보간으로 채움
+    data['습도(%)'].interpolate(inplace=True)  # 습도의 누락된 값을 선형보간으로 채움
+    data['일조(hr)'].fillna(data['일조(hr)'].mean(), inplace=True)  # 일조의 누락된 값을 평균값으로 채움
+    data['일사(MJ/m2)'].fillna(data['일사(MJ/m2)'].mean(), inplace=True)  # 일사의 누락된 값을 평균값으로 채움
+
+    data['태양광용량(kW)'].replace('-', 0, inplace=True)  # 태양광용량의 누락된 값을 0으로 채움
+    data['ESS저장용량(kWh)'].replace('-', 0, inplace=True)  # ESS저장용량의 누락된 값을 0으로 채움
+    data['PCS용량(kW)'].replace('-', 0, inplace=True)  # PCS용량의 누락된 값을 0으로 채움
+
+    data['태양광용량(kW)'] = pd.to_numeric(data['태양광용량(kW)'], errors='coerce').fillna(0)
+    data['ESS저장용량(kWh)'] = pd.to_numeric(data['ESS저장용량(kWh)'], errors='coerce').fillna(0)
+    data['PCS용량(kW)'] = pd.to_numeric(data['PCS용량(kW)'], errors='coerce').fillna(0)
+    
+    return data
+
 
 class BuildingDataset(Dataset):
-    def __init__(self, csv_path, info_path, window_size=10, mode='train'):
-        self.data = pd.read_csv(csv_path)
-        self.info = pd.read_csv(info_path)
+    def __init__(self, dataframe, window_size=10):
+        self.data = dataframe
+        self.window_size = window_size
 
         self.scaler = MinMaxScaler()  # Min-Max Scaler to normalize features
+        self.handle_nan() # NaN 값 처리
 
-        self.data['강수량(mm)'].fillna(0, inplace=True)  # 강수량의 누락된 값을 0으로 채움
-        self.data['풍속(m/s)'].interpolate(inplace=True)  # 풍속의 누락된 값을 선형보간으로 채움
-        self.data['습도(%)'].interpolate(inplace=True)  # 습도의 누락된 값을 선형보간으로 채움
-        self.data['일조(hr)'].fillna(self.data['일조(hr)'].mean(), inplace=True)  # 일조의 누락된 값을 평균값으로 채움
-        self.data['일사(MJ/m2)'].fillna(self.data['일사(MJ/m2)'].mean(), inplace=True)  # 일사의 누락된 값을 평균값으로 채움
-
-        self.data = pd.merge(self.data, self.info, on='건물번호')
-
-        self.data['태양광용량(kW)'].replace('-', 0, inplace=True)  # 태양광용량의 누락된 값을 0으로 채움
-        self.data['ESS저장용량(kWh)'].replace('-', 0, inplace=True)  # ESS저장용량의 누락된 값을 0으로 채움
-        self.data['PCS용량(kW)'].replace('-', 0, inplace=True)  # PCS용량의 누락된 값을 0으로 채움
-
-        self.data['태양광용량(kW)'] = pd.to_numeric(self.data['태양광용량(kW)'], errors='coerce').fillna(0)
-        self.data['ESS저장용량(kWh)'] = pd.to_numeric(self.data['ESS저장용량(kWh)'], errors='coerce').fillna(0)
-        self.data['PCS용량(kW)'] = pd.to_numeric(self.data['PCS용량(kW)'], errors='coerce').fillna(0)
-
-        self.window_size = window_size
-        self.mode = mode
         self.building_data = []  # 각 건물의 데이터를 저장할 리스트
         self.building_nums = pd.factorize(self.data['건물번호'])[0]  # 각 건물번호를 고유한 정수 인덱스로 변환
         self.building_types = pd.factorize(self.data['건물유형'])[0]  # 각 건물유형을 고유한 정수 인덱스로 변환
@@ -85,52 +85,49 @@ class BuildingDataset(Dataset):
         sunshine = torch.tensor(window_data['일조(hr)'].values)
         solar_radiation = torch.tensor(window_data['일사(MJ/m2)'].values)
 
-        if self.mode == 'train':
-            power_consumption = torch.tensor(window_data['전력소비량(kWh)'].values)
-            input_data = torch.stack([
-                building_num,
-                building_type,
-                total_area,
-                cooling_area,
-                solar_capacity,
-                ess_capacity,
-                pcs_capacity,
-                date_time,
-                temperature,
-                rainfall,
-                wind_speed,
-                humidity,
-                sunshine,
-                solar_radiation
-            ], dim=-1)  # Stacks the tensors along a new last dimension
-            return {
-                'input': input_data,
-                'label': power_consumption
-            }
-        else:  # 'test' mode
-            input_data = torch.stack([
-                building_num,
-                building_type,
-                total_area,
-                cooling_area,
-                solar_capacity,
-                ess_capacity,
-                pcs_capacity,
-                date_time,
-                temperature,
-                rainfall,
-                wind_speed,
-                humidity,
-                sunshine,
-                solar_radiation
-            ], dim=-1)  # Stacks the tensors along a new last dimension
-            return {
-                'input': input_data
-            }
+        power_consumption = torch.tensor(window_data['전력소비량(kWh)'].values)
+        input_data = torch.stack([
+            building_num,
+            building_type,
+            total_area,
+            cooling_area,
+            solar_capacity,
+            ess_capacity,
+            pcs_capacity,
+            date_time,
+            temperature,
+            rainfall,
+            wind_speed,
+            humidity,
+            sunshine,
+            solar_radiation
+        ], dim=-1)  # Stacks the tensors along a new last dimension
+        return {'input': input_data, 'label': power_consumption}
     
-# dataset = BuildingDataset('data/train.csv', 'data/building_info.csv', window_size=24, mode='train')
-# loader = DataLoader(dataset, batch_size=32, shuffle=True)
 
-# for batch in loader:
-#     tmp = 1
-#     print('!')
+class TestDataset(Dataset):
+    def __init__(self, csv_path, info_path, window_size=10):
+        self.data = pd.read_csv(csv_path)
+        self.info = pd.read_csv(info_path)
+        self.window_size = window_size
+
+        self.scaler = MinMaxScaler()  # Min-Max Scaler to normalize features
+
+        # Normalize features
+        self.data.iloc[:, 3:-1] = self.scaler.fit_transform(self.data.iloc[:, 3:-1])
+
+    def __len__(self):
+        return len(self.data) - self.window_size
+
+    def __getitem__(self, idx):
+        current_idx = idx + self.window_size
+        data = self.data.iloc[idx:current_idx].values
+        target = None
+        return data, target
+
+dataset = BuildingDataset('data/new_test.csv', 'data/building_info.csv', window_size=10)
+loader = DataLoader(dataset, batch_size=1, shuffle=False)
+
+for batch in loader:
+    tmp = 1
+    print("!")
