@@ -8,7 +8,7 @@ import time
 
 # Local application imports
 from config import get_args
-from dataset import BuildingDataset, handle_nan
+from dataset import BuildingDataset, load_data, handle_nan
 from models import RNNModel, LSTMModel, GRUModel
 from loss_functions import MSE, MAE, MAPE, SMAPE
 import train
@@ -56,7 +56,6 @@ if __name__ == "__main__":
     args = get_args()
     seed_everything(args.seed)
     device = torch.device('cuda:0')
-    model = prepare_model(args.input_dim, args.hidden_dim, args.output_dim, args.num_layers, device)
 
     # Set up logging
     current_time = time.strftime("%Y-%m-%d-%H-%M-%S")
@@ -72,23 +71,26 @@ if __name__ == "__main__":
     logger.info("This is a new log file.")
 
     if args.mode == 'train':
-        model = prepare_model(args.input_dim, args.hidden_dim, args.output_dim, args.num_layers, device)
         lr = args.lr
         epochs = args.epochs
-        data = pd.read_csv(args.data_path)
-        info = pd.read_csv(args.info_path)
-        data = pd. merge(data, info, on='건물번호')
+
+        data = load_data(args.data_path, args.info_path)
+        data = handle_nan(data)
+
+        model = prepare_model(args.input_dim, args.hidden_dim, args.output_dim, args.num_layers, device)
+
         dataset = BuildingDataset(data, args.window_size, args.mode)
 
         run_train(dataset, model, lr, epochs, args.batch_size, logger, device)
 
     else: # args.mode == 'test'
+        data = load_data(args.data_path, args.info_path)
+        data = handle_nan(data)
+
         model = prepare_model(args.input_dim, args.hidden_dim, args.output_dim, args.num_layers, device)
         weights = torch.load(args.model_path)
         model.load_state_dict(weights)
-        data = pd.read_csv(args.data_path)
-        info = pd.read_csv(args.info_path)
-        data = pd. merge(data, info, on='건물번호')
+
         dataset = BuildingDataset(data, args.window_size, args.mode)
 
         run_test(dataset, model, args.batch_size,logger, device)
