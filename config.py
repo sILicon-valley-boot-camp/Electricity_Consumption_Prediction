@@ -10,7 +10,7 @@ def args_for_main(parser):
 def args_for_train(parser):
     parser.add_argument('--data_path', type=str, default='data/new_train.csv', help='data path')
     parser.add_argument('--info_path', type=str, default='data/new_building_info.csv', help='info path')
-    parser.add_argument('--epochs', type=int, default=1000, help='max epochs')
+    parser.add_argument('--epochs', type=int, default=20, help='max epochs')
     parser.add_argument('--lr', type=float, default=5e-4, help='learning rate for the optimizer')
 
     parser.add_argument('--input_dim', type=int, default=19, help='input dimension')
