@@ -26,7 +26,6 @@ class Trainer():
         progress_bar = tqdm(enumerate(self.train_loader), total=len(self.train_loader))
 
         for i, batch in progress_bar:
-            logger.info(f'Fold {fold+1} | Epoch {epoch+1}/{self.epochs} | Batch {i+1}/{len(self.train_loader)} | Training Loss: {loss.item():.4f}')
             inputs = batch['input'].float().to(self.device)
             labels = batch['label'].float().to(self.device)
             outputs = self.model(inputs)
@@ -37,6 +36,7 @@ class Trainer():
             self.optimizer.step()
             running_loss += loss.item() * inputs.size(0)
             progress_bar.set_description(f'Epoch {epoch+1}/{self.epochs} Loss: {loss.item():.4f}')
+            logger.info(f'Fold {fold+1} | Epoch {epoch+1}/{self.epochs} | Batch {i+1}/{len(self.train_loader)} | Training Loss: {loss.item():.4f}')
             # logger.info(f'Epoch {epoch+1} Batch {i+1} Loss: {loss.item():.4f}')
 
         logger.info(f'Fold {fold+1} | Epoch {epoch+1}/{self.epochs} | Average Training Loss: {running_loss / len(self.train_loader.dataset):.4f}')
