@@ -36,7 +36,7 @@ def prepare_model(input_dim, hidden_dim, output_dim, num_layers, device):
     # model = GRUModel(input_dim, hidden_dim, output_dim, num_layers).to(device)
     return model
 
-def run_train(dataset, model_type, lr, epochs, batch_size, logger, device, n_splits=5):
+def run_train(dataset, lr, epochs, batch_size, logger, device, n_splits=5):
     kf = KFold(n_splits=n_splits)
     fold_results = []
 
@@ -79,12 +79,12 @@ if __name__ == "__main__":
     if args.mode == 'train':
         data = load_data(args.data_path, args.info_path)
         dataset = BuildingDataset(data, args.window_size, args.mode)
-        run_train(dataset, args.model_type, args.lr, args.epochs, args.batch_size, logger, device)
+        run_train(dataset, args.lr, args.epochs, args.batch_size, logger, device)
 
     else: # args.mode == 'test'
         data = load_data(args.data_path, args.info_path)
         dataset = BuildingDataset(data, args.window_size, args.mode)
-        model = prepare_model(args.model_type, args.input_dim, args.hidden_dim, args.output_dim, args.num_layers, device)
+        model = prepare_model(args.input_dim, args.hidden_dim, args.output_dim, args.num_layers, device)
         weights = torch.load(args.model_path)
         model.load_state_dict(weights)
         run_test(dataset, model, args.batch_size, logger, device)
