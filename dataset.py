@@ -13,6 +13,18 @@ def load_data(data_path, info_path):
     data = data.sort_values(by=['건물번호', '일시'])
     data['PCS용량(kW)'] = data['PCS용량(kW)'].astype('float64')
     data.reset_index(drop=True, inplace=True)
+
+    start_time = 2022060100
+    end_time = 2022082423
+
+    for building_num in data['건물번호'].unique():
+        data.loc[(data['건물번호'] == building_num) & (data['일시'] == start_time), ['일조(hr)', '일사(MJ/m2)']] = 0
+        data.loc[(data['건물번호'] == building_num) & (data['일시'] == end_time), ['일조(hr)', '일사(MJ/m2)']] = 0
+
+    for building_num in data['건물번호'].unique():
+        building_data = data[data['건물번호'] == building_num]
+        data.loc[data['건물번호'] == building_num, '일조(hr)'] = building_data['일조(hr)'].interpolate(method='linear')
+        data.loc[data['건물번호'] == building_num, '일사(MJ/m2)'] = building_data['일사(MJ/m2)'].interpolate(method='linear')
     
     return data
 
