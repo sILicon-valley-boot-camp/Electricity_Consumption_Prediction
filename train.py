@@ -46,8 +46,8 @@ class Trainer():
 
         with torch.no_grad():
             for batch in self.valid_loader:
-                inputs = batch[0].float().to(self.device)
-                labels = batch[1].float().to(self.device)
+                inputs = batch['input'].float().to(self.device)
+                labels = batch['label'].float().to(self.device)
                 outputs = self.model(inputs)
                 labels = labels.unsqueeze(2)
                 loss = self.loss_fn(outputs, labels)
