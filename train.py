@@ -14,9 +14,9 @@ class Trainer():
         self.result_dir = self.get_result_dir()
 
     def get_result_dir(self):
-        existing_dirs = [dname for dname in os.listdir() if "result" in dname]
+        existing_dirs = [dname for dname in os.listdir() if "result_kfold" in dname]
         dir_count = len(existing_dirs)
-        result_dir = f'result{dir_count + 1}'
+        result_dir = f'result_kfold{dir_count + 1}'
         os.mkdir(result_dir)
         return result_dir
 
@@ -26,8 +26,8 @@ class Trainer():
         progress_bar = tqdm(enumerate(self.train_loader), total=len(self.train_loader))
 
         for i, batch in progress_bar:
-            inputs = batch['input'].float().to(self.device)
-            labels = batch['label'].float().to(self.device)
+            inputs = batch[0].float().to(self.device)
+            labels = batch[1].float().to(self.device)
             outputs = self.model(inputs)
             labels = labels.unsqueeze(2)
             loss = self.loss_fn(outputs, labels)
@@ -46,8 +46,8 @@ class Trainer():
 
         with torch.no_grad():
             for batch in self.valid_loader:
-                inputs = batch['input'].float().to(self.device)
-                labels = batch['label'].float().to(self.device)
+                inputs = batch[0].float().to(self.device)
+                labels = batch[1].float().to(self.device)
                 outputs = self.model(inputs)
                 labels = labels.unsqueeze(2)
                 loss = self.loss_fn(outputs, labels)
@@ -55,7 +55,7 @@ class Trainer():
 
         return running_valid_loss / len(self.valid_loader.dataset)
 
-    def train(self, logger):
+    def train(self, fold, logger):
         train_loss_values = []
         valid_loss_values = []
         best_valid_loss = float('inf')
@@ -67,8 +67,11 @@ class Trainer():
             valid_loss = self.validate()
             valid_loss_values.append(valid_loss)
             print(f'Validation Loss: {valid_loss:.4f}\n')
-            torch.save(self.model.state_dict(), f'{self.result_dir}/model_weights_epoch_{epoch+1}.pth')
+            
+            torch.save(self.model.state_dict(), f'{self.result_dir}/fold_{fold}_model_weights_epoch_{epoch+1}.pth')
 
             if valid_loss < best_valid_loss:
                 best_valid_loss = valid_loss
-                torch.save(self.model.state_dict(), f'{self.result_dir}/best_model_weights.pth')
+                torch.save(self.model.state_dict(), f'{self.result_dir}/fold_{fold}_best_model_weights.pth')
+
+        return best_valid_loss

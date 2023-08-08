@@ -1,12 +1,13 @@
-# Third party imports
-import pandas as pd
-import torch
-from torch.utils.data import DataLoader, random_split
-from torch import optim
-import logging
+import os
 import time
+import logging
+import pandas as pd
+from tqdm import tqdm
+from sklearn.model_selection import KFold
+import torch
+from torch import optim
+from torch.utils.data import DataLoader, random_split
 
-# Local application imports
 from config import get_args
 from dataset import BuildingDataset, load_data
 from models import RNNModel, LSTMModel, GRUModel
@@ -16,30 +17,48 @@ import test
 from utils import seed_everything
 
 
+def setup_logging():
+    current_time = time.strftime("%Y-%m-%d-%H-%M-%S")
+    log_filename = f"log_{current_time}.txt"
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
+    handler = logging.FileHandler(log_filename)
+    handler.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    logger.info("This is a new log file.")
+    return logger
+
+
 def prepare_model(input_dim, hidden_dim, output_dim, num_layers, device):
     model = RNNModel(input_dim, hidden_dim, output_dim, num_layers).to(device)
     # model = LSTMModel(input_dim, hidden_dim, output_dim, num_layers).to(device)
     # model = GRUModel(input_dim, hidden_dim, output_dim, num_layers).to(device)
     return model
 
-def run_train(dataset, model, lr, epochs, batch_size, logger, device):
+def run_train(dataset, model_type, lr, epochs, batch_size, logger, device, n_splits=5):
+    kf = KFold(n_splits=n_splits)
+    fold_results = []
 
-    train_size = int(0.8 * len(dataset))
-    valid_size = len(dataset) - train_size
-    train_dataset, valid_dataset = random_split(dataset, [train_size, valid_size])
+    for fold, (train_idx, valid_idx) in enumerate(kf.split(dataset)):
+        train_subsampler = torch.utils.data.SubsetRandomSampler(train_idx)
+        valid_subsampler = torch.utils.data.SubsetRandomSampler(valid_idx)
 
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    valid_loader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=False)
-    
-    optimizer = optim.Adam(model.parameters(), lr=lr)
-    
-    # loss_function = MSE
-    # loss_function = MAE
-    # loss_function = MAPE
-    loss_function = SMAPE
+        train_loader = DataLoader(dataset, batch_size=batch_size, sampler=train_subsampler)
+        valid_loader = DataLoader(dataset, batch_size=batch_size, sampler=valid_subsampler)
 
-    trainer = train.Trainer(train_loader, valid_loader, model, loss_function, optimizer, epochs, device)
-    trainer.train(logger)
+        model = prepare_model(args.input_dim, args.hidden_dim, args.output_dim, args.num_layers, device)
+        optimizer = optim.Adam(model.parameters(), lr=lr)
+
+        # loss_function = MSE
+        # loss_function = MAE
+        # loss_function = MAPE
+        loss_function = SMAPE
+
+        trainer = train.Trainer(train_loader, valid_loader, model, loss_function, optimizer, epochs, device)
+        fold_result = trainer.train(fold, logger)
+        fold_results.append(fold_result)
 
 def run_test(dataset, model, batch_size, logger, device):
     test_loader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
@@ -56,37 +75,17 @@ if __name__ == "__main__":
     args = get_args()
     seed_everything(args.seed)
     device = torch.device('cuda:0')
-
-    # Set up logging
-    current_time = time.strftime("%Y-%m-%d-%H-%M-%S")
-    log_filename = f"log_{current_time}.txt"
-
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.INFO)
-    handler = logging.FileHandler(log_filename)
-    handler.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    logger.info("This is a new log file.")
+    logger = setup_logging()
 
     if args.mode == 'train':
-        lr = args.lr
-        epochs = args.epochs
-
         data = load_data(args.data_path, args.info_path)
         dataset = BuildingDataset(data, args.window_size, args.mode)
-
-        model = prepare_model(args.input_dim, args.hidden_dim, args.output_dim, args.num_layers, device)
-
-        run_train(dataset, model, lr, epochs, args.batch_size, logger, device)
+        run_train(dataset, args.model_type, args.lr, args.epochs, args.batch_size, logger, device)
 
     else: # args.mode == 'test'
         data = load_data(args.data_path, args.info_path)
         dataset = BuildingDataset(data, args.window_size, args.mode)
-
-        model = prepare_model(args.input_dim, args.hidden_dim, args.output_dim, args.num_layers, device)
+        model = prepare_model(args.model_type, args.input_dim, args.hidden_dim, args.output_dim, args.num_layers, device)
         weights = torch.load(args.model_path)
         model.load_state_dict(weights)
-
-        run_test(dataset, model, args.batch_size,logger, device)
+        run_test(dataset, model, args.batch_size, logger, device)
