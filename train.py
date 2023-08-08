@@ -20,12 +20,13 @@ class Trainer():
         os.mkdir(result_dir)
         return result_dir
 
-    def train_one_epoch(self, epoch, logger):
+    def train_one_epoch(self, epoch, fold, logger):
         running_loss = 0.0
         self.model.train()
         progress_bar = tqdm(enumerate(self.train_loader), total=len(self.train_loader))
 
         for i, batch in progress_bar:
+            logger.info(f'Fold {fold+1} | Epoch {epoch+1}/{self.epochs} | Batch {i+1}/{len(self.train_loader)} | Training Loss: {loss.item():.4f}')
             inputs = batch['input'].float().to(self.device)
             labels = batch['label'].float().to(self.device)
             outputs = self.model(inputs)
@@ -36,11 +37,12 @@ class Trainer():
             self.optimizer.step()
             running_loss += loss.item() * inputs.size(0)
             progress_bar.set_description(f'Epoch {epoch+1}/{self.epochs} Loss: {loss.item():.4f}')
-            logger.info(f'Epoch {epoch+1} Batch {i+1} Loss: {loss.item():.4f}')
+            # logger.info(f'Epoch {epoch+1} Batch {i+1} Loss: {loss.item():.4f}')
 
+        logger.info(f'Fold {fold+1} | Epoch {epoch+1}/{self.epochs} | Average Training Loss: {running_loss / len(self.train_loader.dataset):.4f}')
         return running_loss / len(self.train_loader.dataset)
 
-    def validate(self):
+    def validate(self, fold, logger):
         running_valid_loss = 0.0
         self.model.eval()
 
@@ -53,6 +55,7 @@ class Trainer():
                 loss = self.loss_fn(outputs, labels)
                 running_valid_loss += loss.item() * inputs.size(0)
 
+        logger.info(f'Fold {fold+1} | Validation Average Loss: {running_valid_loss / len(self.valid_loader.dataset):.4f}')
         return running_valid_loss / len(self.valid_loader.dataset)
 
     def train(self, fold, logger):
@@ -61,10 +64,10 @@ class Trainer():
         best_valid_loss = float('inf')
 
         for epoch in range(self.epochs):
-            train_loss = self.train_one_epoch(epoch, logger)
+            train_loss = self.train_one_epoch(epoch, fold, logger)
             train_loss_values.append(train_loss)
             print(f'\nTrain Epoch {epoch+1}/{self.epochs}, Loss: {train_loss:.4f}')
-            valid_loss = self.validate()
+            valid_loss = self.validate(fold, logger)
             valid_loss_values.append(valid_loss)
             print(f'Validation Loss: {valid_loss:.4f}\n')
             
