@@ -110,7 +110,7 @@ if __name__ == "__main__":
             train_loader, valid_loader, model, loss_fn, optimizer, scheduler, device, args.patience, args.epochs, fold_result_path, fold_logger, len(train_dataset), len(valid_dataset))
         trainer.train() #start training
 
-        test_dataset = GraphTimeDataset(ts_df=test_data, flat_df=flat_data, graph=graph, window_size=args.window_size, time_index=test_time)
+        test_dataset = GraphTimeDataset(ts_df=test_data, flat_df=flat_data, graph=graph, label=output_index, window_size=args.window_size, time_index=test_time, train=False)
         test_loader = DataLoader(
             test_dataset, batch_size=1, shuffle=False, num_workers=args.num_workers
         ) #make test data loader
