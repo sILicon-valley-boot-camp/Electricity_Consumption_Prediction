@@ -23,9 +23,9 @@ class GraphTimeDataset(Dataset): #get graph data at t time step
         time = pd.date_range(self.time_index[index] - pd.Timedelta(hours=(self.window_size-1)) , self.time_index[index], freq='H')
         ts_data = self.ts[self.ts['일시'].isin(time)]
 
-        data = ts_data.drop(columns = [self.label] + self.drop)
+        data = [group.drop(columns = [self.label] + self.drop).values for _, group in data.groupby('건물번호')]
 
-        dict_data = {'node_feat': torch.tensor(data.values, dtype=torch.float), #(window_size, feat_dim),
+        dict_data = {'node_feat': torch.tensor(data, dtype=torch.float), #(window_size, feat_dim),
                      'flat': torch.tensor(self.flat.values, dtype=torch.float),
                      'edge_index': self.graph.edge_index}
         

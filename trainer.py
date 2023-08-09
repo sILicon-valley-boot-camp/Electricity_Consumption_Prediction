@@ -49,7 +49,7 @@ class Trainer():
         total_smape = 0
         for batch in tqdm(self.train_loader, file=sys.stdout): #tqdm output will not be written to logger file(will only written to stdout)
             for key in batch.keys():
-                    batch[key] = batch[key].to(self.device)
+                batch[key] = batch[key].to(self.device).squeeze(0)
                 
             y = batch.pop('y')
             self.optimizer.zero_grad()
@@ -58,7 +58,7 @@ class Trainer():
             loss.backward()
             self.optimizer.step()
 
-            total_loss += loss.item() * x.shape[0]
+            total_loss += loss.item() * y.shape[0]
             total_smape += smape(y.detach().cpu().numpy(), output.detach().cpu().numpy()) * x.shape[0]
         
         return total_loss/self.len_train, total_smape/self.len_train
@@ -70,13 +70,13 @@ class Trainer():
             total_smape = 0
             for batch in self.valid_loader:
                 for key in batch.keys():
-                    batch[key] = batch[key].to(self.device)
+                    batch[key] = batch[key].to(self.device).squeeze(0)
                 
                 y = batch.pop('y')
                 output = self.model(**batch)            
                 loss = self.loss_fn(output, y)
 
-                total_loss += loss.item() * x.shape[0]
+                total_loss += loss.item() * y.shape[0]
                 total_smape += smape(y.detach().cpu().numpy(), output.detach().cpu().numpy()) * x.shape[0]
                 
         return total_loss/self.len_valid, total_smape/self.len_valid
@@ -88,9 +88,8 @@ class Trainer():
                 result = []
                 for batch in test_loader:
                     for key in batch.keys():
-                        batch[key] = batch[key].to(self.device)
+                        batch[key] = batch[key].to(self.device).squeeze(0)
                     
-                    y = batch.pop('y')
                     output = self.model(**batch).detach().cpu().unsqueeze(-1).numpy()
                     result.append(output)
 
