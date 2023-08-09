@@ -57,8 +57,9 @@ class BuildingDataset(Dataset):
 
             building_data['건물번호'] = building_num_index
             building_data['건물유형'] = building_type_index
-            building_data['hour'] = self.hours
+            building_data['hour'] = pd.factorize(building_data['hour'])[0]  # 각 건물의 데이터에 맞게 'hour' 칼럼을 factorize
             self.building_data.append(building_data)
+
 
     def __len__(self):
         total_length = sum(max(0, len(data) - self.window_size + 1) for data in self.building_data)
