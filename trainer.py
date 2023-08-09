@@ -59,7 +59,7 @@ class Trainer():
             self.optimizer.step()
 
             total_loss += loss.item() * y.shape[0]
-            total_smape += smape(y.detach().cpu().numpy(), output.detach().cpu().numpy()) * x.shape[0]
+            total_smape += smape(y.detach().cpu().numpy(), output.detach().cpu().numpy()) * y.shape[0]
         
         return total_loss/self.len_train, total_smape/self.len_train
     
@@ -77,7 +77,7 @@ class Trainer():
                 loss = self.loss_fn(output, y)
 
                 total_loss += loss.item() * y.shape[0]
-                total_smape += smape(y.detach().cpu().numpy(), output.detach().cpu().numpy()) * x.shape[0]
+                total_smape += smape(y.detach().cpu().numpy(), output.detach().cpu().numpy()) * y.shape[0]
                 
         return total_loss/self.len_valid, total_smape/self.len_valid
     
