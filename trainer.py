@@ -48,10 +48,12 @@ class Trainer():
         total_loss = 0
         total_smape = 0
         for batch in tqdm(self.train_loader, file=sys.stdout): #tqdm output will not be written to logger file(will only written to stdout)
-            x, y, flat, edge_index, edge_weight = batch['x'].to(self.device), batch['y'].to(self.device), batch['flat'].to(self.device), batch['edge_index'].to(self.device), batch['edge_weight'].to(self.device) 
-
+            for key in batch.keys():
+                    batch[key] = batch[key].to(self.device)
+                
+            y = batch.pop('y')
             self.optimizer.zero_grad()
-            output = self.model(x, flat, edge_index, edge_weight)            
+            output = self.model(**batch)  
             loss = self.loss_fn(output, y)
             loss.backward()
             self.optimizer.step()
@@ -85,9 +87,11 @@ class Trainer():
             with torch.no_grad():
                 result = []
                 for batch in test_loader:
-                    x, flat, edge_index, edge_weight = batch['x'].to(self.device), batch['flat'].to(self.device), batch['edge_index'].to(self.device), batch['edge_weight'].to(self.device) 
-
-                    output = self.model(x, flat, edge_index, edge_weight).detach().cpu().numpy()
+                    for key in batch.keys():
+                        batch[key] = batch[key].to(self.device)
+                    
+                    y = batch.pop('y')
+                    output = self.model(**batch).detach().cpu().unsqueeze(-1).numpy()
                     result.append(output)
 
-            return np.concatenate(result,axis=0).reshape(-1, 1)
+            return np.stack(result,axis=0).T.reshape(-1, 1)
