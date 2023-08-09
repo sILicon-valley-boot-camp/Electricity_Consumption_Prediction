@@ -42,7 +42,7 @@ if __name__ == "__main__":
     train_start = min(train_data['일시'])
     train_end = max(train_data['일시'])
 
-    train_time = pd.date_range(train_start - pd.Timedelta(hours=(args.window_size-1)) , train_end, freq='H') #for compatibility
+    train_time = pd.date_range(train_start + pd.Timedelta(hours=(args.window_size-1)) , train_end, freq='H') #for compatibility
     
     output_index = '전력소비량(kWh)'
     scaling_col = list(set(train_data.columns) - {'num_date_time', '건물번호', '일시', '전력소비량(kWh)'})
@@ -115,7 +115,7 @@ if __name__ == "__main__":
             test_dataset, batch_size=1, shuffle=False, num_workers=args.num_workers
         ) #make test data loader
 
-        prediction['answer'] += target_scaler.inverse_transform(trainer.test(test_loader, args.window_size)).squeeze(-1)
+        prediction['answer'] += target_scaler.inverse_transform(trainer.test(test_loader)).squeeze(-1)
         prediction.to_csv(os.path.join(result_path, 'sum.csv'), index=False) 
         
         stackking_input.loc[valid_index, output_index] = target_scaler.inverse_transform(trainer.test(valid_loader)).squeeze(-1) #use the validation data(hold out dataset) to make input for Stacking Ensemble model(out of fold prediction)

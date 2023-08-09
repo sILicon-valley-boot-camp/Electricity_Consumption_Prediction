@@ -14,7 +14,7 @@ class GraphTimeDataset(Dataset): #get graph data at t time step
         self.window_size = window_size
         self.time_index = time_index
         self.label = label
-        self.drop = ['num_date_time', '건물번호', '일시']
+        self.drop = ['num_date_time', '건물번호', '일시'] if self.label is None else [self.label] + ['num_date_time', '건물번호', '일시']
         self.graph = from_networkx(graph)
 
     def __len__(self):
@@ -24,7 +24,7 @@ class GraphTimeDataset(Dataset): #get graph data at t time step
         time = pd.date_range(self.time_index[index] - pd.Timedelta(hours=(self.window_size-1)) , self.time_index[index], freq='H')
         ts_data = self.ts[self.ts['일시'].isin(time)]
 
-        data = np.array([group.drop(columns = [self.label] + self.drop).values for _, group in ts_data.groupby('건물번호')])
+        data = np.array([group.drop(columns = self.drop).values for _, group in ts_data.groupby('건물번호')])
 
         dict_data = {'node_feat': torch.tensor(data, dtype=torch.float), #(window_size, feat_dim),
                      'flat': torch.tensor(self.flat.values, dtype=torch.float),
