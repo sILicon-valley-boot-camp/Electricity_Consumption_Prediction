@@ -67,9 +67,11 @@ class Trainer():
             total_loss = 0
             total_smape = 0
             for batch in self.valid_loader:
-                x, y, flat, edge_index, edge_weight = batch['x'].to(self.device), batch['y'].to(self.device), batch['flat'].to(self.device), batch['edge_index'].to(self.device), batch['edge_weight'].to(self.device) 
-
-                output = self.model(x, flat, edge_index, edge_weight)            
+                for key in batch.keys():
+                    batch[key] = batch[key].to(self.device)
+                
+                y = batch.pop('y')
+                output = self.model(**batch)            
                 loss = self.loss_fn(output, y)
 
                 total_loss += loss.item() * x.shape[0]

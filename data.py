@@ -25,7 +25,7 @@ class GraphTimeDataset(Dataset): #get graph data at t time step
 
         data = ts_data.drop(columns = [self.label] + self.drop)
 
-        dict_data = {'x': torch.tensor(data.values, dtype=torch.float), #(window_size, feat_dim),
+        dict_data = {'node_feat': torch.tensor(data.values, dtype=torch.float), #(window_size, feat_dim),
                      'flat': torch.tensor(self.flat.values, dtype=torch.float),
                      'edge_index': self.graph.edge_index}
         
