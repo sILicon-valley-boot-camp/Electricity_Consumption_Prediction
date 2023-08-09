@@ -1,12 +1,9 @@
-import os
 import time
 import logging
-import pandas as pd
-from tqdm import tqdm
 from sklearn.model_selection import KFold
 import torch
 from torch import optim
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader
 
 from config import get_args
 from dataset import BuildingDataset, load_data
@@ -40,7 +37,6 @@ def prepare_model(input_dim, hidden_dim, output_dim, num_layers, device):
 
 def run_train(dataset, lr, epochs, batch_size, logger, device, n_splits=5):
     kf = KFold(n_splits=n_splits)
-    fold_results = []
 
     for fold, (train_idx, valid_idx) in enumerate(kf.split(dataset)):
         train_subsampler = torch.utils.data.SubsetRandomSampler(train_idx)
@@ -59,8 +55,7 @@ def run_train(dataset, lr, epochs, batch_size, logger, device, n_splits=5):
 
         trainer = train.Trainer(train_loader, valid_loader, model, loss_function, optimizer, epochs, device)
         fold_result = trainer.train(fold, logger)
-        fold_results.append(fold_result)
-        
+
 
 def run_test(dataset, model, batch_size, logger, device):
     test_loader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
