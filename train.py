@@ -1,5 +1,6 @@
 import os
 import torch
+from torch.utils.checkpoint import checkpoint
 from tqdm import tqdm
 
 class Trainer():
@@ -28,7 +29,7 @@ class Trainer():
         for i, batch in progress_bar:
             inputs = batch['input'].float().to(self.device)
             labels = batch['label'].float().to(self.device)
-            outputs = self.model(inputs)
+            outputs = checkpoint(self.model, inputs)
             labels = labels.unsqueeze(2)
             loss = self.loss_fn(outputs, labels)
             self.optimizer.zero_grad()
@@ -69,8 +70,6 @@ class Trainer():
             valid_loss_values.append(valid_loss)
             print(f'Validation Loss: {valid_loss:.4f}\n')
             
-            torch.save(self.model.state_dict(), f'{self.result_dir}/fold_{fold}_model_weights_epoch_{epoch+1}.pth')
-
             if valid_loss < best_valid_loss:
                 best_valid_loss = valid_loss
                 torch.save(self.model.state_dict(), f'{self.result_dir}/fold_{fold}_best_model_weights.pth')

@@ -6,8 +6,36 @@ from sklearn.preprocessing import MinMaxScaler
 
 
 def load_data(data_path, info_path):
-    data = pd.read_csv(data_path)
-    info = pd.read_csv(info_path)
+    data_dtype_dict = {
+    '건물번호': 'int16',
+    '일시': 'int32',
+    'hour': 'int16',
+    'PE1': 'float32',
+    'PE2': 'float32',
+    'PE3': 'float32',
+    'PE4': 'float32',
+    'PE5': 'float32',
+    '기온(C)': 'float32',
+    '습도(%)': 'float32',
+    '풍속(m/s)': 'float32',
+    '강수량(mm)': 'float32',
+    '일조(hr)': 'float32',
+    '일사(MJ/m2)': 'float32',
+    '전력소비량(kWh)': 'float32'
+    }
+
+    info_dtype_dict = {
+    '건물번호': 'int16',
+    '건물유형': 'object',
+    '연면적(m2)': 'float32',
+    '냉방면적(m2)': 'float32',
+    '태양광용량(kW)': 'float32',
+    'ESS저장용량(kWh)': 'float32',
+    'PCS용량(kW)': 'float32'
+    }
+
+    data = pd.read_csv(data_path, dtype=data_dtype_dict)
+    info = pd.read_csv(info_path, dtype=info_dtype_dict)
     data = pd.merge(data, info, on='건물번호')
 
     data = data.sort_values(by=['건물번호', '일시'])

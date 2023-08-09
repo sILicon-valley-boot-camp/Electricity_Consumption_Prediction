@@ -77,6 +77,7 @@ if __name__ == "__main__":
     if args.mode == 'train':
         data = load_data(args.data_path, args.info_path)
         dataset = BuildingDataset(data, args.window_size, args.mode)
+        del data
         run_train(dataset, args.lr, args.epochs, args.batch_size, logger, device)
 
     else: # args.mode == 'test'
