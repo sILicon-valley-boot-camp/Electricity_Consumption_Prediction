@@ -18,12 +18,12 @@ class RnnGnn(nn.Module):
             gnn_in = args.hidden
 
         args_gnn = {}
-        if args.gnn == 'GAT':
+        if args.GNN == 'GAT':
             args_gnn = {'v2':args.v2}
-        elif args.gnn == 'GraphSAGE':
+        elif args.GNN == 'GraphSAGE':
             args_gnn = {'aggr':args.aggr}
 
-        self.gnn = getattr(g_nn , args.gnn)(
+        self.gnn = getattr(g_nn , args.GNN)(
             in_channels=gnn_in, hidden_channels=args.gnn_hidden, num_layers=args.gnn_n_layers, 
             out_channels=args.gnn_output_size, dropout=args.gnn_drop_p, norm=args.norm, jk=args.jk, #jk jumping knowdledge -> layer wise aggregation
             **args_gnn

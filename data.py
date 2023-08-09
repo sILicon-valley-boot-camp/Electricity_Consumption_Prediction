@@ -24,10 +24,15 @@ class GraphTimeDataset(Dataset): #get graph data at t time step
         ts_data = self.ts[self.ts['일시'].isin(time)]
 
         data = ts_data.drop(columns = [self.label] + self.drop)
-        label = ts_data[ts_data['일시']==self.time_index[index]][self.label].values if self.label is not None else -1
 
-        return {'x': torch.tensor(data.values, dtype=torch.float), #(window_size, feat_dim)
-                'y': torch.tensor(label, dtype=torch.float),
-                'flat': torch.tensor(self.flat.values, dtype=torch.float),
-                'edge_index': self.graph.edge_index,
-                'edge_weight': self.graph.edge_weight}
+        dict_data = {'x': torch.tensor(data.values, dtype=torch.float), #(window_size, feat_dim),
+                     'flat': torch.tensor(self.flat.values, dtype=torch.float),
+                     'edge_index': self.graph.edge_index}
+        
+        if self.label is not None:
+            dict_data['y'] = torch.tensor(ts_data[ts_data['일시']==self.time_index[index]][self.label].values, dtype=torch.float)
+        
+        if self.graph.edge_weight is not None:
+            dict_data['edge_weight'] = self.graph.edge_weight
+
+        return dict_data
