@@ -44,4 +44,4 @@ class RnnGnn(nn.Module):
         x = torch.concat([x, x_flat, out], dim=-1)
         x = self.dropout(x)
 
-        return self.out_layer(x)
+        return self.out_layer(x).squeeze(-1)
