@@ -30,11 +30,13 @@ def setup_logging():
     logger.info("This is a new log file.")
     return logger
 
+
 def prepare_model(input_dim, hidden_dim, output_dim, num_layers, device):
     model = RNNModel(input_dim, hidden_dim, output_dim, num_layers).to(device)
     # model = LSTMModel(input_dim, hidden_dim, output_dim, num_layers).to(device)
     # model = GRUModel(input_dim, hidden_dim, output_dim, num_layers).to(device)
     return model
+
 
 def run_train(dataset, lr, epochs, batch_size, logger, device, n_splits=5):
     kf = KFold(n_splits=n_splits)
@@ -58,6 +60,7 @@ def run_train(dataset, lr, epochs, batch_size, logger, device, n_splits=5):
         trainer = train.Trainer(train_loader, valid_loader, model, loss_function, optimizer, epochs, device)
         fold_result = trainer.train(fold, logger)
         fold_results.append(fold_result)
+        
 
 def run_test(dataset, model, batch_size, logger, device):
     test_loader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
