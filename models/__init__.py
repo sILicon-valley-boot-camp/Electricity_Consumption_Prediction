@@ -22,7 +22,7 @@ def args_for_model(parser, model, GNN_model=None):
         parser.add_argument('--gnn_hidden', type=int, default=50)
         parser.add_argument('--gnn_n_layers', type=int, default=2)
         parser.add_argument('--gnn_output_size', type=int, default=10)
-        parser.add_argument('--gnn_drop_p', type=int, default=10)
+        parser.add_argument('--gnn_drop_p', type=float, default=0.5)
         parser.add_argument('--norm', type=str, default=None)
         parser.add_argument('--jk', type=str, default=None)
         parser.add_argument('--flat_out', type=int, default=10)
@@ -30,7 +30,7 @@ def args_for_model(parser, model, GNN_model=None):
         if GNN_model == 'GAT':
             parser.add_argument('--v2', type=bool, default=True)
         elif GNN_model == 'GraphSAGE':
-            parser.add_argument('--aggr', type=str, default=None)
+            parser.add_argument('--aggr', type=str, default='mean')
 
 class TimeSeriesModel(nn.Module):
     def __init__(self, args, feature_size):

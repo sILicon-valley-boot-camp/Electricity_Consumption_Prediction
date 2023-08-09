@@ -29,6 +29,7 @@ class RnnGnn(nn.Module):
             **args_gnn
         )
 
+        self.dropout = nn.Dropout(p=args.dropout)
         self.flat_encoder = nn.Linear(args.flat_dim, args.flat_out)
         self.out_layer = nn.Linear(args.gnn_output_size+args.flat_out+gnn_in, 1)
 
@@ -40,7 +41,7 @@ class RnnGnn(nn.Module):
         x = self.gnn(out, edge_index, edge_weight=edge_weight)
         
         x_flat = self.flat_encoder(flat)
-        x = torch.concat([x, x_flat, out])
-        x = F.dropout(x, p=self.dropout, training=self.training)
+        x = torch.concat([x, x_flat, out], dim=-1)
+        x = self.dropout(x)
 
         return self.out_layer(x)
