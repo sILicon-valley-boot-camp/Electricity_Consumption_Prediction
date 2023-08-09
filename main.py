@@ -33,6 +33,7 @@ if __name__ == "__main__":
     #logger to log result of every output
 
     flat_data = pd.read_csv(args.flat)
+    args.flat_dim = len(flat_data.columns)
 
     train_data = pd.read_csv(args.train)
     train_data['일시'] = pd.to_datetime(train_data['일시'])
