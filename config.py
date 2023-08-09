@@ -11,6 +11,7 @@ def args_for_data(parser):
     parser.add_argument('--window_size', type=int, default=10)
     
 def args_for_train(parser):
+    parser.add_argument('--comment', type=str, default='')
     parser.add_argument('--cv_k', type=int, default=10, help='k-fold stratified cross validation')
     parser.add_argument('--num_workers', type=int, default=4, help='num_workers')
     #parser.add_argument('--batch_size', type=int, default=None, help='batch_size') batch_size fixed to 1

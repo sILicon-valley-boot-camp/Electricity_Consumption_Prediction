@@ -24,7 +24,7 @@ if __name__ == "__main__":
     if args.continue_train > 0:
         result_path = args.continue_from_folder
     else:
-        result_path = os.path.join(args.result_path, args.model + args.GNN + '_' + str(len(os.listdir(args.result_path))))
+        result_path = os.path.join(args.result_path, args.comment + '_' + args.model + args.GNN + '_' + str(len(os.listdir(args.result_path))))
         os.makedirs(result_path)
     
     logging.basicConfig(level=logging.INFO, format='%(message)s')
