@@ -27,7 +27,7 @@ class Trainer():
         progress_bar = tqdm(enumerate(self.train_loader), total=len(self.train_loader))
 
         for i, batch in progress_bar:
-            inputs = batch['input'].float().to(self.device)
+            inputs = batch['input'].float().to(self.device).requires_grad_(True)
             labels = batch['label'].float().to(self.device)
             outputs = checkpoint(self.model, inputs)
             labels = labels.unsqueeze(2)
