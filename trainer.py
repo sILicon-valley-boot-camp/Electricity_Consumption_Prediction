@@ -48,10 +48,10 @@ class Trainer():
         total_loss = 0
         total_smape = 0
         for batch in tqdm(self.train_loader, file=sys.stdout): #tqdm output will not be written to logger file(will only written to stdout)
-            x, y = batch['x'].to(self.device), batch['y'].to(self.device)
+            x, y, flat, edge_index, edge_weight = batch['x'].to(self.device), batch['y'].to(self.device), batch['flat'].to(self.device), batch['edge_index'].to(self.device), batch['edge_weight'].to(self.device) 
 
             self.optimizer.zero_grad()
-            output = self.model(x)            
+            output = self.model(x, flat, edge_index, edge_weight)            
             loss = self.loss_fn(output, y)
             loss.backward()
             self.optimizer.step()
@@ -67,9 +67,9 @@ class Trainer():
             total_loss = 0
             total_smape = 0
             for batch in self.valid_loader:
-                x, y = batch['x'].to(self.device), batch['y'].to(self.device)
+                x, y, flat, edge_index, edge_weight = batch['x'].to(self.device), batch['y'].to(self.device), batch['flat'].to(self.device), batch['edge_index'].to(self.device), batch['edge_weight'].to(self.device) 
 
-                output = self.model(x)
+                output = self.model(x, flat, edge_index, edge_weight)            
                 loss = self.loss_fn(output, y)
 
                 total_loss += loss.item() * x.shape[0]
@@ -77,28 +77,15 @@ class Trainer():
                 
         return total_loss/self.len_valid, total_smape/self.len_valid
     
-    def inference(self, test_loader, window_size):
-        self.model.load_state_dict(torch.load(self.best_model_path))
-        self.model.eval()
-        with torch.no_grad():
-            result = []
-            for batch in test_loader:
-                batch['x'] = batch['x'].squeeze(0)
-                for index in range(batch['x'].shape[0] - (window_size-1)):
-                    x = batch['x'][index:index+window_size, :].to(self.device).unsqueeze(0)
-                 
-                    output = self.model(x).detach()
-                    result.append(output.cpu().item())
-        return np.array(result).reshape(-1, 1)
-    
     def test(self, test_loader): #for making predictions on validation set, generating input for stacking Ensemble
             self.model.load_state_dict(torch.load(self.best_model_path))
             self.model.eval()
             with torch.no_grad():
                 result = []
                 for batch in test_loader:
-                    x = batch['x'].to(self.device)
-                    output = self.model(x).detach().cpu().numpy()
+                    x, flat, edge_index, edge_weight = batch['x'].to(self.device), batch['flat'].to(self.device), batch['edge_index'].to(self.device), batch['edge_weight'].to(self.device) 
+
+                    output = self.model(x, flat, edge_index, edge_weight).detach().cpu().numpy()
                     result.append(output)
 
             return np.concatenate(result,axis=0).reshape(-1, 1)

@@ -1,8 +1,10 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
 from .Transformer import TimeSeriesTransformerEncoder
 from .RNN import RNN
+from .GNN import RnnGnn
 
 def args_for_model(parser, model):
     parser.add_argument('--pooling', type=str, default="last", choices=['mean', 'max', 'last', 'first', 'all'])

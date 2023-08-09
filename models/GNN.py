@@ -32,12 +32,12 @@ class RnnGnn(nn.Module):
         self.flat_encoder = nn.Linear(args.flat_dim, args.flat_out)
         self.out_layer = nn.Linear(args.gnn_output_size+args.flat_out+gnn_in, 1)
 
-    def forward(self, src, flat, adjs, edge_weight):
+    def forward(self, src, flat, edge_index, edge_weight):
         src = torch.transpose(src, 0, 1).contiguous() # change to (seq, bs, feat) shape
         out = self.encoder(src) # return (bs, feat)
 
         out = out.view(out.shape[0], -1) # all_nodes, rnn_outdim
-        x = self.gnn(out, adjs, edge_weight)
+        x = self.gnn(out, edge_index, edge_weight)
         
         x_flat = self.flat_encoder(flat)
         x = torch.concat([x, x_flat, out])
