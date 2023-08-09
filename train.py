@@ -36,8 +36,6 @@ class Trainer():
             self.optimizer.step()
             running_loss += loss.item() * inputs.size(0)
             progress_bar.set_description(f'Epoch {epoch+1}/{self.epochs} Loss: {loss.item():.4f}')
-            logger.info(f'Fold {fold+1} | Epoch {epoch+1}/{self.epochs} | Batch {i+1}/{len(self.train_loader)} | Training Loss: {loss.item():.4f}')
-            # logger.info(f'Epoch {epoch+1} Batch {i+1} Loss: {loss.item():.4f}')
 
         logger.info(f'Fold {fold+1} | Epoch {epoch+1}/{self.epochs} | Average Training Loss: {running_loss / len(self.train_loader.dataset):.4f}')
         return running_loss / len(self.train_loader.dataset)
