@@ -87,6 +87,7 @@ class Trainer():
             with torch.no_grad():
                 result = []
                 for batch in test_loader:
+                    del batch['y']
                     for key in batch.keys():
                         batch[key] = batch[key].to(self.device).squeeze(0)
                     
