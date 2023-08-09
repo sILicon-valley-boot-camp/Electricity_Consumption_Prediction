@@ -10,6 +10,7 @@ from torch.utils.data import DataLoader
 
 import models
 from config import get_args
+from graph import get_graph
 from trainer import Trainer
 from lr_scheduler import get_sch
 from utils import seed_everything
@@ -72,6 +73,8 @@ if __name__ == "__main__":
         prediction = pd.read_csv(os.path.join(result_path, 'sum.csv'))
         stackking_input = pd.read_csv(os.path.join(result_path, f'for_stacking_input.csv'))
 
+    graph = get_graph(args, flat_data.values, result_path)
+
     skf = KFold(n_splits=args.cv_k, random_state=args.seed, shuffle=True) #Using StratifiedKFold for cross-validation    
     for fold, (train_index, valid_index) in enumerate(skf.split(train_time)): #using the target_data's index for kfold cross validation split
         kfold_train_time = train_time[train_index]
@@ -88,8 +91,8 @@ if __name__ == "__main__":
         fold_logger.info(f'start training of {fold+1}-fold')
         #logger to log current n-fold output
 
-        train_dataset = GraphTimeDataset(ts_df=train_data, flat_df=flat_data, graph=None, label=output_index, window_size=args.window_size, time_index=kfold_train_time)
-        valid_dataset = GraphTimeDataset(ts_df=train_data, flat_df=flat_data, graph=None, label=output_index, window_size=args.window_size, time_index=kfold_valid_time)
+        train_dataset = GraphTimeDataset(ts_df=train_data, flat_df=flat_data, graph=graph, label=output_index, window_size=args.window_size, time_index=kfold_train_time)
+        valid_dataset = GraphTimeDataset(ts_df=train_data, flat_df=flat_data, graph=graph, label=output_index, window_size=args.window_size, time_index=kfold_valid_time)
 
         model = getattr(models , 'RnnGnn')(args, input_size).to(device)
         loss_fn = nn.MSELoss()
@@ -107,7 +110,7 @@ if __name__ == "__main__":
             train_loader, valid_loader, model, loss_fn, optimizer, scheduler, device, args.patience, args.epochs, fold_result_path, fold_logger, len(train_dataset), len(valid_dataset))
         trainer.train() #start training
 
-        test_dataset = GraphTimeDataset(ts_df=test_data, flat_df=flat_data, graph=None, window_size=args.window_size, time_index=test_time)
+        test_dataset = GraphTimeDataset(ts_df=test_data, flat_df=flat_data, graph=graph, window_size=args.window_size, time_index=test_time)
         test_loader = DataLoader(
             test_dataset, batch_size=1, shuffle=False, num_workers=args.num_workers
         ) #make test data loader

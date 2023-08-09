@@ -23,6 +23,10 @@ def args_for_train(parser):
     parser.add_argument('--continue_train', type=int, default=-1, help='continue training from fold x') 
     parser.add_argument('--continue_from_folder', type=str, help='continue training from args.continue_from')
 
+def args_for_graph(parser):
+    parser.add_argument('--graph', type=str, default='knn')
+    parser.add_argument('--k', type=int, default=5)
+
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--seed', default=42, type=int)
@@ -31,6 +35,7 @@ def get_args():
 
     args_for_data(parser)
     args_for_train(parser)
+    args_for_graph(parser)
     _args, _ = parser.parse_known_args()
     args_for_model(parser, _args.model, _args.GNN)
 
