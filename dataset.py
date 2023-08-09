@@ -76,7 +76,7 @@ class BuildingDataset(Dataset):
 
         features = [
             '건물번호', '건물유형', '연면적(m2)', '냉방면적(m2)', '태양광용량(kW)', 'ESS저장용량(kWh)', 'PCS용량(kW)',
-            'PE1', 'PE2', 'PE3', 'PE4', 'PE5', '기온(C)', '습도(%)', '풍속(m/s)', '강수량(mm)', '일조(hr)', '일사(MJ/m2)'
+            'hour', 'PE1', 'PE2', 'PE3', 'PE4', 'PE5', '기온(C)', '습도(%)', '풍속(m/s)', '강수량(mm)', '일조(hr)', '일사(MJ/m2)'
         ]
         input_data = torch.tensor(window_data[features].values, dtype=torch.float32)
         power_consumption = torch.tensor(window_data['전력소비량(kWh)'].values, dtype=torch.float32)
