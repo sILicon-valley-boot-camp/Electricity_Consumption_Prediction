@@ -1,13 +1,14 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from .Transformer import TimeSeriesTransformerEncoder
 from .RNN import RNN
 
 def args_for_model(parser, model):
     parser.add_argument('--pooling', type=str, default="last", choices=['mean', 'max', 'last', 'first', 'all'])
+    parser.add_argument('--dropout', type=float, default=0.5)
     
     if model == 'transformer':
-        parser.add_argument('--transformer_dropout', type=float, default=0.5)
         parser.add_argument('--n_head', type=int, default=5)
         parser.add_argument('--num_layers', type=int, default=1)
 
