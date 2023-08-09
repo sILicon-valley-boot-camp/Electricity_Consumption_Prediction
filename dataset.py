@@ -39,6 +39,7 @@ class BuildingDataset(Dataset):
         self.building_data = []
         self.building_nums = pd.factorize(self.data['건물번호'])[0]
         self.building_types = pd.factorize(self.data['건물유형'])[0]
+        self.hours = pd.factorize(self.data['hour'])[0]
 
         continuous_columns = [
             "연면적(m2)", "냉방면적(m2)", "태양광용량(kW)", "ESS저장용량(kWh)", "PCS용량(kW)",
@@ -56,6 +57,7 @@ class BuildingDataset(Dataset):
 
             building_data['건물번호'] = building_num_index
             building_data['건물유형'] = building_type_index
+            building_data['hour'] = self.hours
             self.building_data.append(building_data)
 
     def __len__(self):
