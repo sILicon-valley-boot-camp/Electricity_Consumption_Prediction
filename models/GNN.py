@@ -26,7 +26,7 @@ class RnnGnn(nn.Module):
         self.node_embedding = nn.Embedding(100, args.emb_dim)
 
         self.gnn = getattr(g_nn , args.GNN)(
-            in_channels=gnn_in, hidden_channels=args.gnn_hidden, num_layers=args.gnn_n_layers, 
+            in_channels=gnn_in+args.emb_dim, hidden_channels=args.gnn_hidden, num_layers=args.gnn_n_layers, 
             out_channels=args.gnn_output_size, dropout=args.gnn_drop_p, norm=args.norm, jk=args.jk, #jk jumping knowdledge -> layer wise aggregation
             **args_gnn
         )
@@ -40,8 +40,8 @@ class RnnGnn(nn.Module):
         out = self.encoder(node_feat) # return (bs, feat)
 
         out = out.view(out.shape[0], -1) # all_nodes, rnn_outdim
-        gnn_in = torch.concat([out, self.node_embedding.weight], dim=-1)
-        x = self.gnn(gnn_in, edge_index, edge_weight=edge_weight)
+        gnn_input = torch.concat([out, self.node_embedding.weight], dim=-1)
+        x = self.gnn(gnn_input, edge_index, edge_weight=edge_weight)
         
         x_flat = self.flat_encoder(flat)
         x = torch.concat([x, x_flat, out], dim=-1)
