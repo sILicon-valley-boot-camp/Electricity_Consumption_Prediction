@@ -48,10 +48,8 @@ if __name__ == "__main__":
     scaling_col = list(set(train_data.columns) - {'num_date_time', '건물번호', '일시', '전력소비량(kWh)'})
     input_size = len(scaling_col)
     data_scaler = MinMaxScaler()
-    target_scaler = MinMaxScaler()
     
     train_data[scaling_col] = data_scaler.fit_transform(train_data[scaling_col])
-    train_data[output_index] = target_scaler.fit_transform(train_data[output_index].values.reshape(-1, 1))
 
     test_data = pd.read_csv(args.test)
     test_data['일시'] = pd.to_datetime(test_data['일시'])
@@ -115,10 +113,10 @@ if __name__ == "__main__":
             test_dataset, batch_size=1, shuffle=False, num_workers=args.num_workers
         ) #make test data loader
 
-        prediction['answer'] += target_scaler.inverse_transform(trainer.test(test_loader)).squeeze(-1)
+        prediction['answer'] += trainer.test(test_loader).squeeze(-1)
         prediction.to_csv(os.path.join(result_path, 'sum.csv'), index=False) 
         
-        stackking_input.loc[train_data['일시'].isin(train_time[valid_index]), output_index] = target_scaler.inverse_transform(trainer.test(valid_loader)).squeeze(-1) #use the validation data(hold out dataset) to make input for Stacking Ensemble model(out of fold prediction)
+        stackking_input.loc[train_data['일시'].isin(train_time[valid_index]), output_index] = trainer.test(valid_loader).squeeze(-1) #use the validation data(hold out dataset) to make input for Stacking Ensemble model(out of fold prediction)
         #may need testing with trainer.inference()
         stackking_input.to_csv(os.path.join(result_path, f'for_stacking_input.csv'), index=False)
 
