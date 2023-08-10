@@ -58,16 +58,12 @@ class Trainer():
         return running_valid_loss / len(self.valid_loader.dataset)
 
     def train(self, fold, logger):
-        train_loss_values = []
-        valid_loss_values = []
         best_valid_loss = float('inf')
 
         for epoch in range(self.epochs):
             train_loss = self.train_one_epoch(epoch, fold, logger)
-            train_loss_values.append(train_loss)
             print(f'\nTrain Epoch {epoch+1}/{self.epochs}, Loss: {train_loss:.4f}')
             valid_loss = self.validate(fold, logger)
-            valid_loss_values.append(valid_loss)
             print(f'Validation Loss: {valid_loss:.4f}\n')
             
             if valid_loss < best_valid_loss:
