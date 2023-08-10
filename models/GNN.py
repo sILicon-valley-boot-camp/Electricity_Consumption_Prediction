@@ -26,16 +26,16 @@ class RnnGnn(nn.Module):
         last_output_size = args.gnn_output_size
         self.node_embedding = nn.Embedding(100, args.emb_dim)
 
+        self.concat_rnn = args.concat_rnn
+        if self.concat_rnn:
+            last_output_size += gnn_in
+
         self.concat_before = args.concat_before
         if self.concat_before:
             gnn_in += args.emb_dim+args.flat_out
         else:
             last_output_size += args.emb_dim+args.flat_out
         
-        self.concat_rnn = args.concat_rnn
-        if self.concat_rnn:
-            last_output_size += gnn_in
-
         self.gnn = getattr(g_nn , args.GNN)(
             in_channels=gnn_in, hidden_channels=args.gnn_hidden, num_layers=args.gnn_n_layers, 
             out_channels=args.gnn_output_size, dropout=args.gnn_drop_p, norm=args.norm, jk=args.jk, #jk jumping knowdledge -> layer wise aggregation
