@@ -26,7 +26,11 @@ def args_for_model(parser, model, GNN_model=None):
         parser.add_argument('--norm', type=str, default=None)
         parser.add_argument('--jk', type=str, default=None)
         parser.add_argument('--flat_out', type=int, default=10)
-        parser.add_argument('--emb_dim', type=int, default=10)        
+        parser.add_argument('--emb_dim', type=int, default=10)    
+
+        #experiments
+        parser.add_argument('--concat_before', type=bool, default=True)
+        parser.add_argument('--concat_rnn', type=bool, default=True)
 
         if GNN_model == 'GAT':
             parser.add_argument('--v2', type=bool, default=True)
