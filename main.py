@@ -1,3 +1,4 @@
+import gc
 import time
 import logging
 from sklearn.model_selection import KFold
@@ -57,6 +58,7 @@ def run_train(dataset, lr, epochs, batch_size, logger, device, n_splits=5):
         fold_result = trainer.train(fold, logger)
 
         del model, optimizer, trainer
+        gc.collect()
 
 
 def run_test(dataset, model, batch_size, logger, device):
@@ -71,6 +73,7 @@ def run_test(dataset, model, batch_size, logger, device):
     tester.test(logger)
 
     del model
+    gc.collect()
 
 
 if __name__ == "__main__":
@@ -83,6 +86,7 @@ if __name__ == "__main__":
         data = load_data(args.data_path, args.info_path)
         dataset = BuildingDataset(data, args.window_size, args.mode)
         del data
+        gc.collect()
         run_train(dataset, args.lr, args.epochs, args.batch_size, logger, device)
 
     else: # args.mode == 'test'
