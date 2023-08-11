@@ -14,12 +14,14 @@ class Trainer():
         self.device = device
         self.result_dir = self.get_result_dir()
 
+
     def get_result_dir(self):
         existing_dirs = [dname for dname in os.listdir() if "result_kfold" in dname]
         dir_count = len(existing_dirs)
         result_dir = f'result_kfold{dir_count + 1}'
         os.mkdir(result_dir)
         return result_dir
+    
 
     def train_one_epoch(self, epoch, fold, logger):
         running_loss = 0.0
@@ -38,8 +40,11 @@ class Trainer():
             running_loss += loss.item() * inputs.size(0)
             progress_bar.set_description(f'Epoch {epoch+1}/{self.epochs} Loss: {loss.item():.4f}')
 
+            del outputs, loss
+
         logger.info(f'Fold {fold+1} | Epoch {epoch+1}/{self.epochs} | Average Training Loss: {running_loss / len(self.train_loader.dataset):.4f}')
         return running_loss / len(self.train_loader.dataset)
+    
 
     def validate(self, fold, logger):
         running_valid_loss = 0.0
@@ -54,8 +59,11 @@ class Trainer():
                 loss = self.loss_fn(outputs, labels)
                 running_valid_loss += loss.item() * inputs.size(0)
 
+                del outputs, loss
+
         logger.info(f'Fold {fold+1} | Validation Average Loss: {running_valid_loss / len(self.valid_loader.dataset):.4f}')
         return running_valid_loss / len(self.valid_loader.dataset)
+    
 
     def train(self, fold, logger):
         best_valid_loss = float('inf')
@@ -68,6 +76,9 @@ class Trainer():
             
             if valid_loss < best_valid_loss:
                 best_valid_loss = valid_loss
-                torch.save(self.model.state_dict(), f'{self.result_dir}/fold_{fold}_best_model_weights.pth')
+                torch.save(self.model.state_dict(), f'{self.result_dir}/fold_{fold}_best_model_weights.pth', _use_new_zipfile_serialization=False)
+
+        self.model = None
+        self.optimizer = None
 
         return best_valid_loss

@@ -56,6 +56,8 @@ def run_train(dataset, lr, epochs, batch_size, logger, device, n_splits=5):
         trainer = train.Trainer(train_loader, valid_loader, model, loss_function, optimizer, epochs, device)
         fold_result = trainer.train(fold, logger)
 
+        del model, optimizer, trainer
+
 
 def run_test(dataset, model, batch_size, logger, device):
     test_loader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
@@ -67,6 +69,9 @@ def run_test(dataset, model, batch_size, logger, device):
 
     tester = test.Tester(test_loader, model, loss_function, device)
     tester.test(logger)
+
+    del model
+
 
 if __name__ == "__main__":
     args = get_args()
