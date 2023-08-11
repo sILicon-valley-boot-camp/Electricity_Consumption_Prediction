@@ -1,4 +1,3 @@
-import gc
 import os
 import torch
 from torch.utils.checkpoint import checkpoint
@@ -42,7 +41,6 @@ class Trainer():
             progress_bar.set_description(f'Epoch {epoch+1}/{self.epochs} Loss: {loss.item():.4f}')
 
             del outputs, loss
-            gc.collect()
 
         logger.info(f'Fold {fold+1} | Epoch {epoch+1}/{self.epochs} | Average Training Loss: {running_loss / len(self.train_loader.dataset):.4f}')
         return running_loss / len(self.train_loader.dataset)
@@ -62,7 +60,6 @@ class Trainer():
                 running_valid_loss += loss.item() * inputs.size(0)
 
                 del outputs, loss
-                gc.collect()
 
         logger.info(f'Fold {fold+1} | Validation Average Loss: {running_valid_loss / len(self.valid_loader.dataset):.4f}')
         return running_valid_loss / len(self.valid_loader.dataset)
@@ -80,9 +77,5 @@ class Trainer():
             if valid_loss < best_valid_loss:
                 best_valid_loss = valid_loss
                 torch.save(self.model.state_dict(), f'{self.result_dir}/fold_{fold}_best_model_weights.pth', _use_new_zipfile_serialization=False)
-
-        self.model = None
-        self.optimizer = None
-        gc.collect()
 
         return best_valid_loss
