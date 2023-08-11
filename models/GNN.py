@@ -13,14 +13,14 @@ class RnnGnn(nn.Module):
 
         if args.model == 'transformer':
             self.encoder = TimeSeriesTransformerEncoder(args, feature_size)
-            gnn_in = feature_size
+            enc_out = feature_size
 
         if args.model == 'LSTM' or args.model == 'GRU':
             self.encoder = RNN(args, feature_size)
-            gnn_in = args.hidden
+            enc_out = args.hidden
 
-        gnn_in = self.get_size_for_gnn(gnn_in, args.flat_out, args.emb_dim)
-        gnn_out = self.get_size_for_gnn(args.gnn_output_size, args.flat_out, args.emb_dim)
+        gnn_in = self.get_size_for_gnn(enc_out, args.flat_out, args.emb_dim)
+        gnn_out = args.gnn_output_size + self.get_size_for_out(enc_out, args.flat_out, args.emb_dim)
 
         args_gnn = {}
         if args.GNN == 'GAT':
