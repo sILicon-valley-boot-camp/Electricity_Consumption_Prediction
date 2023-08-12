@@ -20,7 +20,7 @@ parser.add_argument("--target_col", required=True)
 parser.add_argument("--drop", nargs='*')
 
 parser.add_argument("--seed", type=int, default=72)
-parser.add_argument("--eval_metric", default='mse')
+parser.add_argument("--eval_metric", default='mae')
 
 args = parser.parse_args()
 
