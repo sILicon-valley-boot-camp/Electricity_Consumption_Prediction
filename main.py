@@ -96,3 +96,4 @@ if __name__ == "__main__":
         weights = torch.load(args.model_path)
         model.load_state_dict(weights)
         run_test(dataset, model, args.batch_size, logger, device)
+
