@@ -5,10 +5,11 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import StratifiedKFold, KFold
 
 import torch
-from torch import optim, nn
+from torch import optim
 from torch.utils.data import DataLoader
 
 import models
+from loss import get_loss
 from config import get_args
 from graph import get_graph
 from trainer import Trainer
@@ -93,7 +94,7 @@ if __name__ == "__main__":
         valid_dataset = GraphTimeDataset(ts_df=train_data, flat_df=flat_data, graph=graph, label=output_index, window_size=args.window_size, time_index=kfold_valid_time)
 
         model = getattr(models , 'RnnGnn')(args, input_size).to(device)
-        loss_fn = nn.MSELoss()
+        loss_fn = get_loss(args.loss_name)
         optimizer = optim.Adam(model.parameters(), lr=args.lr)
         scheduler = get_sch(args.scheduler)(optimizer)
 

@@ -1,4 +1,6 @@
 import argparse
+
+from loss import args_for_loss
 from models import args_for_model
 
 def args_for_data(parser):
@@ -36,6 +38,7 @@ def get_args():
 
     args_for_data(parser)
     args_for_train(parser)
+    args_for_loss(parser)
     args_for_graph(parser)
     _args, _ = parser.parse_known_args()
     args_for_model(parser, _args.model, _args.GNN)
