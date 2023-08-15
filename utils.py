@@ -19,7 +19,7 @@ def smape(true, pred):
     output = np.mean(v) * 100
     return output
 
-def handle_unhandled_exception(logger, exc_type, exc_value, exc_traceback):
+def handle_unhandled_exception(exc_type, exc_value, exc_traceback, logger=None):
     if issubclass(exc_type, KeyboardInterrupt):
                 #Will call default excepthook
         sys.__excepthook__(exc_type, exc_value, exc_traceback)
