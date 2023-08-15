@@ -10,7 +10,7 @@ def get_graph(args, time_series, flat, result_path):
         graph = create_knn(flat.values, args.k, metric=args.sim)
 
     if args.graph == 'EU_mean_knn':
-        graph = create_knn(np.stack(time_series.groupby('건물번호').apply(lambda x: x['전력소비량(kWh)'].mean())).reshape(-1, 1).values, args.k, metric=args.sim)
+        graph = create_knn(np.stack(time_series.groupby('건물번호').apply(lambda x: x['전력소비량(kWh)'].mean())).reshape(-1, 1), args.k, metric=args.sim)
 
     if args.graph == 'EU_ts_knn':
         graph = create_knn(np.stack(time_series.groupby('건물번호').apply(lambda x: x['전력소비량(kWh)'].values.reshape(-1))), args.k, metric=args.sim)
