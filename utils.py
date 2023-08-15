@@ -1,4 +1,5 @@
 import os
+import sys
 import torch
 import random
 import numpy as np
@@ -17,3 +18,12 @@ def smape(true, pred):
     v = 2 * abs(pred - true) / (abs(pred) + abs(true))
     output = np.mean(v) * 100
     return output
+
+def handle_unhandled_exception(logger, exc_type, exc_value, exc_traceback):
+    if issubclass(exc_type, KeyboardInterrupt):
+                #Will call default excepthook
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        return
+        #Create a critical level log message with info from the except hook.
+    logger.critical("Unhandled exception", exc_info=(exc_type, exc_value, exc_traceback))
+

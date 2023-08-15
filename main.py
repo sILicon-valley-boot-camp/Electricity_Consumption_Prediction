@@ -1,6 +1,8 @@
 import os
+import sys
 import logging
 import pandas as pd
+from functools import partial
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import StratifiedKFold, KFold
 
@@ -14,7 +16,7 @@ from config import get_args
 from graph import get_graph
 from trainer import Trainer
 from lr_scheduler import get_sch
-from utils import seed_everything
+from utils import seed_everything, handle_unhandled_exception
 from data import GraphTimeDataset
 
 if __name__ == "__main__":
@@ -32,7 +34,8 @@ if __name__ == "__main__":
     logger = logging.getLogger()
     logger.addHandler(logging.FileHandler(os.path.join(result_path, 'log.log')))    
     logger.info(args)
-    #logger to log result of every output
+    sys.excepthook = partial(handle_unhandled_exception(logger=logger))
+
 
     flat_data = pd.read_csv(args.flat)
     args.flat_dim = len(flat_data.columns)
