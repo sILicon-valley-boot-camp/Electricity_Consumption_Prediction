@@ -10,6 +10,7 @@ class RnnGnn(nn.Module):
         super().__init__()
         self.outputs_after_gnn = args.outputs_after_gnn
         self.gnn_input = args.gnn_input
+        self.k = args.k
 
         if args.model == 'transformer':
             self.encoder = TimeSeriesTransformerEncoder(args, feature_size)
@@ -82,8 +83,21 @@ class RnnGnn(nn.Module):
             array.append(node_emb)
 
         return torch.concat(array, dim=-1)
-
-    def forward(self, node_feat, flat, edge_index, edge_weight=None):
+    
+    def sim_matrix(self, a, b, eps=1e-8):
+        a_n, b_n = a.norm(dim=1)[:, None], b.norm(dim=1)[:, None]
+        a_norm = a / torch.max(a_n, eps * torch.ones_like(a_n))
+        b_norm = b / torch.max(b_n, eps * torch.ones_like(b_n))
+        sim_mt = torch.mm(a_norm, b_norm.transpose(0, 1))
+        return sim_mt
+    
+    def get_edge_index(self, emb):
+        src = torch.arange(0, emb.shape(0)).unsqueeze(-1).expand(-1, self.k)
+        tgt = torch.topk(self.sim_matrix(emb, emb).fill_diagonal_(0), k=self.k)
+        edge_index = torch.stack([src, tgt], dim=-1).view(-1, 2)
+        return edge_index
+        
+    def forward(self, node_feat, flat, edge_index=None, edge_weight=None):
         node_feat = torch.transpose(node_feat, 0, 1).contiguous() # change to (seq, bs, feat) shape
         enc_out = self.encoder(node_feat) # return (bs, feat)
         enc_out = enc_out.view(enc_out.shape[0], -1) # all_nodes, rnn_outdim
@@ -92,6 +106,10 @@ class RnnGnn(nn.Module):
         node_emb = self.node_embedding.weight
 
         gnn_input = self.prepare_input_for_gnn(enc_out, flat, node_emb)
+
+        if edge_index is None:
+            edge_index = self.get_edge_index(node_emb.clone().detach())
+
         gnn_output = self.gnn(gnn_input, edge_index, edge_weight=edge_weight)
 
         output = self.prepare_output_with_gnn(gnn_output, enc_out, flat, node_emb)

@@ -14,7 +14,7 @@ class GraphTimeDataset(Dataset): #get graph data at t time step
         self.window_size = window_size
         self.time_index = time_index
         self.drop = ['num_date_time', '건물번호', '일시']
-        self.graph = from_networkx(graph)
+        self.graph = from_networkx(graph) if graph is not None else None
         self.label = label
 
     def __len__(self):
@@ -28,10 +28,12 @@ class GraphTimeDataset(Dataset): #get graph data at t time step
 
         dict_data = {'node_feat': torch.tensor(data, dtype=torch.float), #(window_size, feat_dim),
                      'flat': torch.tensor(self.flat.values, dtype=torch.float),
-                     'edge_index': self.graph.edge_index,
                      'y': torch.tensor(ts_data[ts_data['일시']==self.time_index[index]][self.label].values, dtype=torch.float)}
                 
-        if self.graph.edge_weight is not None:
+        if self.graph is not None:
+            dict_data['edge_index'] = self.graph.edge_index
+
+        if self.graph is not None and self.graph.edge_weight is not None:
             dict_data['edge_weight'] = self.graph.edge_weight
 
         return dict_data
