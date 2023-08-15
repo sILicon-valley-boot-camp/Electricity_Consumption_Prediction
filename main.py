@@ -31,8 +31,8 @@ def setup_logging():
 
 def prepare_model(input_dim, hidden_dim, output_dim, num_layers, device):
     # model = RNNModel(input_dim, hidden_dim, output_dim, num_layers).to(device)
-    model = LSTMModel(input_dim, hidden_dim, output_dim, num_layers).to(device)
-    # model = GRUModel(input_dim, hidden_dim, output_dim, num_layers).to(device)
+    # model = LSTMModel(input_dim, hidden_dim, output_dim, num_layers).to(device)
+    model = GRUModel(input_dim, hidden_dim, output_dim, num_layers).to(device)
     return model
 
 
