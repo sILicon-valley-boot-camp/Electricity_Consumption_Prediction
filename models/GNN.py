@@ -94,9 +94,9 @@ class RnnGnn(nn.Module):
     def get_edge_index(self, emb):
         src = torch.arange(0, emb.shape[0], device=emb.device).unsqueeze(-1).expand(-1, self.k)
         tgt = torch.topk(self.sim_matrix(emb, emb).fill_diagonal_(0), k=self.k)[1]
-        edge_index = torch.stack([src, tgt], dim=-1).view(-1, 2).tran
+        edge_index = torch.stack([src, tgt], dim=-1).view(-1, 2)
         return torch.transpose(edge_index, 0, 1).contiguous()
-        
+
     def forward(self, node_feat, flat, edge_index=None, edge_weight=None):
         node_feat = torch.transpose(node_feat, 0, 1).contiguous() # change to (seq, bs, feat) shape
         enc_out = self.encoder(node_feat) # return (bs, feat)
