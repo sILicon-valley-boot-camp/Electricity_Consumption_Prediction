@@ -72,7 +72,7 @@ if __name__ == "__main__":
         prediction = pd.read_csv(os.path.join(result_path, 'sum.csv'))
         stackking_input = pd.read_csv(os.path.join(result_path, f'for_stacking_input.csv'))
 
-    graph = get_graph(args, train_data, flat_data, result_path)
+    graph = get_graph(args, train_data, flat_data, result_path) if args.graph != 'node_emb' else None
 
     skf = KFold(n_splits=args.cv_k, random_state=args.seed, shuffle=True) #Using StratifiedKFold for cross-validation    
     for fold, (train_index, valid_index) in enumerate(skf.split(train_time)): #using the target_data's index for kfold cross validation split
