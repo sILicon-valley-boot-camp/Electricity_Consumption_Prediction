@@ -29,6 +29,7 @@ def args_for_train(parser):
 def args_for_graph(parser):
     parser.add_argument('--graph', type=str, default='knn')
     parser.add_argument('--k', type=int, default=5)
+    parser.add_argument('--sim', type=str, default='minkowski')
 
 def get_args():
     parser = argparse.ArgumentParser()
