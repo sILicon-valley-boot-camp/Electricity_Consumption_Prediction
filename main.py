@@ -34,7 +34,7 @@ if __name__ == "__main__":
     logger = logging.getLogger()
     logger.addHandler(logging.FileHandler(os.path.join(result_path, 'log.log')))    
     logger.info(args)
-    sys.excepthook = partial(handle_unhandled_exception(logger=logger))
+    sys.excepthook = partial(handle_unhandled_exception,logger=logger)
 
 
     flat_data = pd.read_csv(args.flat)
