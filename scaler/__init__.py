@@ -2,7 +2,7 @@ import sklearn.preprocessing as sp
 
 
 def args_for_scaler(parser):
-    parser.add_argument('--scaler_name', type=str, default="MinMax", choices=['MinMax', 'Standard', 'Quantile_u', 'Quantile_g'])
+    parser.add_argument('--scaler_name', type=str, default='MinMax', choices=['MinMax', 'Standard', 'Quantile_u', 'Quantile_g', 'None'])
 
 def get_scaler(scaler_name):
     if scaler_name == 'MinMax':
