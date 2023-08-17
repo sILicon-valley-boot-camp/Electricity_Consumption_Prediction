@@ -7,14 +7,14 @@ from tqdm import tqdm
 from utils import smape
 
 class Trainer():
-    def __init__(self, train_loader, valid_loader, model, loss_fn, optimizer, scheduler, target_scaler, device, patience, epochs, result_path, fold_logger, len_train, len_valid):
+    def __init__(self, train_loader, valid_loader, model, loss_fn, optimizer, scheduler, scaling_fn, device, patience, epochs, result_path, fold_logger, len_train, len_valid):
         self.train_loader = train_loader
         self.valid_loader = valid_loader
         self.model = model
         self.loss_fn = loss_fn
         self.optimizer = optimizer
         self.scheduler = scheduler
-        self.target_scaler = target_scaler
+        self.scaling_fn = scaling_fn
         self.device = device
         self.patience = patience
         self.epochs = epochs
@@ -61,8 +61,8 @@ class Trainer():
 
             total_loss += loss.item()
             total_smape += smape(
-                self.target_scaler.inverse_transform(y.detach().cpu().numpy()), 
-                self.target_scaler.inverse_transform(output.detach().cpu().numpy())
+                self.scaling_fn(y.detach().cpu().numpy()), 
+                self.scaling_fn(output.detach().cpu().numpy())
             )
         
         return total_loss/self.len_train, total_smape/self.len_train
@@ -82,8 +82,8 @@ class Trainer():
 
                 total_loss += loss.item()
                 total_smape += smape(
-                    self.target_scaler.inverse_transform(y.detach().cpu().numpy()), 
-                    self.target_scaler.inverse_transform(output.detach().cpu().numpy())
+                    self.scaling_fn(y.detach().cpu().numpy()), 
+                    self.scaling_fn(output.detach().cpu().numpy())
                 )
                 
         return total_loss/self.len_valid, total_smape/self.len_valid
@@ -102,7 +102,4 @@ class Trainer():
                 result.append(output)
 
         result_array = np.stack(result,axis=0).T.reshape(-1, 1)
-        if self.target_scaler is None:
-            return result_array
-        else:
-            return self.target_scaler.inverse_transform(result_array)
+        return self.scaling_fn(result_array)

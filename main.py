@@ -59,6 +59,10 @@ if __name__ == "__main__":
 
     if target_scaler is not None:
         train_data[output_index] = target_scaler.fit_transform(train_data[output_index].values.reshape(-1, 1))
+        scaling_fn = target_scaler.fit_transform
+    else:
+        scaling_fn = lambda x:x
+        
 
     test_data = pd.read_csv(args.test)
     test_data['일시'] = pd.to_datetime(test_data['일시'])
@@ -114,7 +118,7 @@ if __name__ == "__main__":
         )
         
         trainer = Trainer(
-            train_loader, valid_loader, model, loss_fn, optimizer, scheduler, target_scaler, device, args.patience, args.epochs, fold_result_path, fold_logger, len(train_dataset), len(valid_dataset))
+            train_loader, valid_loader, model, loss_fn, optimizer, scheduler, scaling_fn, device, args.patience, args.epochs, fold_result_path, fold_logger, len(train_dataset), len(valid_dataset))
         trainer.train() #start training
 
         test_dataset = GraphTimeDataset(ts_df=test_data, flat_df=flat_data, graph=graph, label=output_index, window_size=args.window_size, time_index=test_time)
