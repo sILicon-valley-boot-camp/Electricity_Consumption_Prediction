@@ -58,7 +58,7 @@ if __name__ == "__main__":
     train_data[scaling_col] = data_scaler.fit_transform(train_data[scaling_col])
 
     if target_scaler is not None:
-        train_data[output_index] = target_scaler.fit_transform(train_data[output_index])
+        train_data[output_index] = target_scaler.fit_transform(train_data[output_index].values.reshape(-1, 1))
 
     test_data = pd.read_csv(args.test)
     test_data['일시'] = pd.to_datetime(test_data['일시'])
