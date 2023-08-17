@@ -7,13 +7,14 @@ from tqdm import tqdm
 from utils import smape
 
 class Trainer():
-    def __init__(self, train_loader, valid_loader, model, loss_fn, optimizer, scheduler, device, patience, epochs, result_path, fold_logger, len_train, len_valid):
+    def __init__(self, train_loader, valid_loader, model, loss_fn, optimizer, scheduler, target_scaler, device, patience, epochs, result_path, fold_logger, len_train, len_valid):
         self.train_loader = train_loader
         self.valid_loader = valid_loader
         self.model = model
         self.loss_fn = loss_fn
         self.optimizer = optimizer
         self.scheduler = scheduler
+        self.target_scaler = target_scaler
         self.device = device
         self.patience = patience
         self.epochs = epochs
@@ -59,7 +60,10 @@ class Trainer():
             self.optimizer.step()
 
             total_loss += loss.item()
-            total_smape += smape(y.detach().cpu().numpy(), output.detach().cpu().numpy())
+            total_smape += smape(
+                self.target_scaler.inverse_transform(y.detach().cpu().numpy()), 
+                self.target_scaler.inverse_transform(output.detach().cpu().numpy())
+            )
         
         return total_loss/self.len_train, total_smape/self.len_train
     
@@ -77,21 +81,28 @@ class Trainer():
                 loss = self.loss_fn(output, y)
 
                 total_loss += loss.item()
-                total_smape += smape(y.detach().cpu().numpy(), output.detach().cpu().numpy())
+                total_smape += smape(
+                    self.target_scaler.inverse_transform(y.detach().cpu().numpy()), 
+                    self.target_scaler.inverse_transform(output.detach().cpu().numpy())
+                )
                 
         return total_loss/self.len_valid, total_smape/self.len_valid
     
     def test(self, test_loader): #for making predictions on validation set, generating input for stacking Ensemble
-            self.model.load_state_dict(torch.load(self.best_model_path))
-            self.model.eval()
-            with torch.no_grad():
-                result = []
-                for batch in test_loader:
-                    del batch['y']
-                    for key in batch.keys():
-                        batch[key] = batch[key].to(self.device).squeeze(0)
-                    
-                    output = self.model(**batch).detach().cpu().unsqueeze(-1).numpy()
-                    result.append(output)
+        self.model.load_state_dict(torch.load(self.best_model_path))
+        self.model.eval()
+        with torch.no_grad():
+            result = []
+            for batch in test_loader:
+                del batch['y']
+                for key in batch.keys():
+                    batch[key] = batch[key].to(self.device).squeeze(0)
+                
+                output = self.model(**batch).detach().cpu().unsqueeze(-1).numpy()
+                result.append(output)
 
-            return np.stack(result,axis=0).T.reshape(-1, 1)
+        result_array = np.stack(result,axis=0).T.reshape(-1, 1)
+        if self.target_scaler is None:
+            return result_array
+        else:
+            return self.target_scaler.inverse_transform(result_array)

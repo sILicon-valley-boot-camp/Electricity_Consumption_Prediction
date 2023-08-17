@@ -37,8 +37,9 @@ class RnnGnn(nn.Module):
 
         self.node_embedding = nn.Embedding(100, args.emb_dim)
         self.flat_encoder = nn.Linear(args.flat_dim, args.flat_out)
-        self.dropout = nn.Dropout(p=args.dropout)
-        self.out_layer = nn.Linear(gnn_out, 1)
+
+        out_layer = [nn.Dropout(p=args.dropout), nn.Linear(gnn_out, 1)] + ([nn.Sigmoid()] if not args.no_sigmoid else [])
+        self.out_layer = nn.Sequential(*out_layer)
 
     def get_size_for_gnn(self, enc_size, flat_size, emb_size):
         size = 0
@@ -113,6 +114,4 @@ class RnnGnn(nn.Module):
         gnn_output = self.gnn(gnn_input, edge_index, edge_weight=edge_weight)
 
         output = self.prepare_output_with_gnn(gnn_output, enc_out, flat, node_emb)
-        output = self.dropout(output)
-
         return self.out_layer(output).squeeze(-1)

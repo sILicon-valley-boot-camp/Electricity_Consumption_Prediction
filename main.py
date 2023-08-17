@@ -15,6 +15,7 @@ from loss import get_loss
 from config import get_args
 from graph import get_graph
 from trainer import Trainer
+from scaler import get_scaler
 from lr_scheduler import get_sch
 from utils import seed_everything, handle_unhandled_exception
 from data import GraphTimeDataset
@@ -52,8 +53,12 @@ if __name__ == "__main__":
     scaling_col = list(set(train_data.columns) - {'num_date_time', '건물번호', '일시', '전력소비량(kWh)'})
     input_size = len(scaling_col)
     data_scaler = MinMaxScaler()
+    target_scaler = get_scaler(args.scaler_name)
     
     train_data[scaling_col] = data_scaler.fit_transform(train_data[scaling_col])
+
+    if target_scaler is not None:
+        train_data[output_index] = target_scaler.fit_transform(train_data[output_index])
 
     test_data = pd.read_csv(args.test)
     test_data['일시'] = pd.to_datetime(test_data['일시'])
@@ -109,7 +114,7 @@ if __name__ == "__main__":
         )
         
         trainer = Trainer(
-            train_loader, valid_loader, model, loss_fn, optimizer, scheduler, device, args.patience, args.epochs, fold_result_path, fold_logger, len(train_dataset), len(valid_dataset))
+            train_loader, valid_loader, model, loss_fn, optimizer, scheduler, target_scaler, device, args.patience, args.epochs, fold_result_path, fold_logger, len(train_dataset), len(valid_dataset))
         trainer.train() #start training
 
         test_dataset = GraphTimeDataset(ts_df=test_data, flat_df=flat_data, graph=graph, label=output_index, window_size=args.window_size, time_index=test_time)

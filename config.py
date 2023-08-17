@@ -2,6 +2,7 @@ import argparse
 
 from loss import args_for_loss
 from models import args_for_model
+from scaler import args_for_scaler
 
 def args_for_data(parser):
     parser.add_argument('--train', type=str, default='../data/train.csv')
@@ -22,6 +23,7 @@ def args_for_train(parser):
     parser.add_argument('--lr', type=float, default=5e-4, help='learning rate for the optimizer')
     parser.add_argument('--scheduler', type=str, default='None')
     parser.add_argument('--warmup_epochs', type=int, default=10, help='number of warmup epoch of lr scheduler(Not Implemented)')
+    parser.add_argument('--no_sigmoid', type=bool, default=False, help='whether to use sigmoid at the last', action='store_true')
 
     parser.add_argument('--continue_train', type=int, default=-1, help='continue training from fold x') 
     parser.add_argument('--continue_from_folder', type=str, help='continue training from args.continue_from')
@@ -40,6 +42,7 @@ def get_args():
     args_for_data(parser)
     args_for_train(parser)
     args_for_loss(parser)
+    args_for_scaler(parser)
     args_for_graph(parser)
     _args, _ = parser.parse_known_args()
     args_for_model(parser, _args.model, _args.GNN)
