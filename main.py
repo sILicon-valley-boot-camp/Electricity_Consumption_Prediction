@@ -59,7 +59,7 @@ if __name__ == "__main__":
 
     if target_scaler is not None:
         train_data[output_index] = target_scaler.fit_transform(train_data[output_index].values.reshape(-1, 1))
-        scaling_fn = target_scaler.fit_transform
+        scaling_fn = target_scaler.inverse_transform
     else:
         scaling_fn = lambda x:x
         
