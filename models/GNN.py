@@ -114,4 +114,4 @@ class RnnGnn(nn.Module):
         gnn_output = self.gnn(gnn_input, edge_index, edge_weight=edge_weight)
 
         output = self.prepare_output_with_gnn(gnn_output, enc_out, flat, node_emb)
-        return self.out_layer(output).squeeze(-1)
+        return self.out_layer(output)

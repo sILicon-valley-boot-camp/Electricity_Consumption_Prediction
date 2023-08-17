@@ -52,7 +52,7 @@ class Trainer():
             for key in batch.keys():
                 batch[key] = batch[key].to(self.device).squeeze(0)
                 
-            y = batch.pop('y')
+            y = batch.pop('y').reshape(-1, 1)
             self.optimizer.zero_grad()
             output = self.model(**batch)  
             loss = self.loss_fn(output, y)
@@ -76,7 +76,7 @@ class Trainer():
                 for key in batch.keys():
                     batch[key] = batch[key].to(self.device).squeeze(0)
                 
-                y = batch.pop('y')
+                y = batch.pop('y').reshape(-1, 1)
                 output = self.model(**batch)            
                 loss = self.loss_fn(output, y)
 
