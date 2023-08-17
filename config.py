@@ -23,7 +23,7 @@ def args_for_train(parser):
     parser.add_argument('--lr', type=float, default=5e-4, help='learning rate for the optimizer')
     parser.add_argument('--scheduler', type=str, default='None')
     parser.add_argument('--warmup_epochs', type=int, default=10, help='number of warmup epoch of lr scheduler(Not Implemented)')
-    parser.add_argument('--no_sigmoid', type=bool, default=False, help='whether to use sigmoid at the last', action='store_true')
+    parser.add_argument('--no_sigmoid', default=False, help='whether to use sigmoid at the last', action='store_true')
 
     parser.add_argument('--continue_train', type=int, default=-1, help='continue training from fold x') 
     parser.add_argument('--continue_from_folder', type=str, help='continue training from args.continue_from')
