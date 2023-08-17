@@ -104,7 +104,7 @@ class RnnGnn(nn.Module):
         enc_out = enc_out.view(enc_out.shape[0], -1) # all_nodes, rnn_outdim
 
         flat = self.flat_encoder(flat)
-        node_emb = self.node_embedding.weight
+        node_emb = self.node_embedding.weight.expand(enc_out.shape[0], -1)
 
         gnn_input = self.prepare_input_for_gnn(enc_out, flat, node_emb)
 

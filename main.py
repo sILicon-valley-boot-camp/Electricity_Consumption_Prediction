@@ -8,7 +8,8 @@ from sklearn.model_selection import StratifiedKFold, KFold
 
 import torch
 from torch import optim
-from torch.utils.data import DataLoader
+#from torch.utils.data import DataLoader
+from torch_geometric.data import DataLoader
 
 import models
 from loss import get_loss
@@ -17,8 +18,8 @@ from graph import get_graph
 from trainer import Trainer
 from scaler import get_scaler
 from lr_scheduler import get_sch
-from utils import seed_everything, handle_unhandled_exception
 from data import GraphTimeDataset
+from utils import seed_everything, handle_unhandled_exception
 
 if __name__ == "__main__":
     args = get_args()
@@ -111,10 +112,10 @@ if __name__ == "__main__":
         scheduler = get_sch(args.scheduler)(optimizer)
 
         train_loader = DataLoader(
-            train_dataset, batch_size=1, shuffle=True, num_workers=args.num_workers, #pin_memory=True
+            train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers #pin_memory=True
         )
         valid_loader = DataLoader(
-            valid_dataset, batch_size=1, shuffle=False, num_workers=args.num_workers, #pin_memory=True
+            valid_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers #pin_memory=True
         )
         
         trainer = Trainer(
@@ -123,7 +124,7 @@ if __name__ == "__main__":
 
         test_dataset = GraphTimeDataset(ts_df=test_data, flat_df=flat_data, graph=graph, label=output_index, window_size=args.window_size, time_index=test_time)
         test_loader = DataLoader(
-            test_dataset, batch_size=1, shuffle=False, num_workers=args.num_workers
+            test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers
         ) #make test data loader
 
         prediction['answer'] += trainer.test(test_loader).squeeze(-1)

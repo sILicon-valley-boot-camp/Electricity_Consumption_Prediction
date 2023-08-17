@@ -17,7 +17,7 @@ def args_for_train(parser):
     parser.add_argument('--comment', type=str, default='')
     parser.add_argument('--cv_k', type=int, default=10, help='k-fold stratified cross validation')
     parser.add_argument('--num_workers', type=int, default=4, help='num_workers')
-    #parser.add_argument('--batch_size', type=int, default=None, help='batch_size') batch_size fixed to 1
+    parser.add_argument('--batch_size', type=int, default=None, help='batch_size')
     parser.add_argument('--epochs', type=int, default=1000, help='max epochs')
     parser.add_argument('--patience', type=int, default=15, help='patience for early stopping')    
     parser.add_argument('--lr', type=float, default=5e-4, help='learning rate for the optimizer')

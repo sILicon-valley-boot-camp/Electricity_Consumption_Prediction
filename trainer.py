@@ -49,12 +49,18 @@ class Trainer():
         total_loss = 0
         total_smape = 0
         for batch in tqdm(self.train_loader, file=sys.stdout): #tqdm output will not be written to logger file(will only written to stdout)
-            for key in batch.keys():
-                batch[key] = batch[key].to(self.device).squeeze(0)
-                
+            del['batch']; del['ptr']
+            batch = batch.to(self.device)
+            flat = self.train_loader.dataset.flat.to(self.device)
+
             y = batch.pop('y').reshape(-1, 1)
             self.optimizer.zero_grad()
-            output = self.model(**batch)  
+            output = self.model(
+                    node_feat=batch['x'], 
+                    flat=flat, 
+                    edge_index=batch['edge_index'] if 'edge_index' in batch.keys else None, 
+                    edge_weight=batch['edge_attr'] if 'edge_attr' in batch.keys else None
+            )
             loss = self.loss_fn(output, y)
             loss.backward()
             self.optimizer.step()
@@ -73,11 +79,17 @@ class Trainer():
             total_loss = 0
             total_smape = 0
             for batch in self.valid_loader:
-                for key in batch.keys():
-                    batch[key] = batch[key].to(self.device).squeeze(0)
+                del['batch']; del['ptr']
+                batch = batch.to(self.device)
+                flat = self.valid_loader.dataset.flat.to(self.device)
                 
                 y = batch.pop('y').reshape(-1, 1)
-                output = self.model(**batch)            
+                output = self.model(
+                    node_feat=batch['x'], 
+                    flat=flat, 
+                    edge_index=batch['edge_index'] if 'edge_index' in batch.keys else None, 
+                    edge_weight=batch['edge_attr'] if 'edge_attr' in batch.keys else None
+                ) 
                 loss = self.loss_fn(output, y)
 
                 total_loss += loss.item()
@@ -94,9 +106,16 @@ class Trainer():
         with torch.no_grad():
             result = []
             for batch in test_loader:
-                del batch['y']
-                for key in batch.keys():
-                    batch[key] = batch[key].to(self.device).squeeze(0)
+                del batch['y']; del['batch']; del['ptr']
+                batch = batch.to(self.device)
+                flat = self.test_loader.dataset.flat.to(self.device)
+
+                output = self.model(
+                    node_feat=batch['x'], 
+                    flat=flat, 
+                    edge_index=batch['edge_index'] if 'edge_index' in batch.keys else None, 
+                    edge_weight=batch['edge_attr'] if 'edge_attr' in batch.keys else None
+                ) 
                 
                 output = self.model(**batch).detach().cpu().unsqueeze(-1).numpy()
                 result.append(output)

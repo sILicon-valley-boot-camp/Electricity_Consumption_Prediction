@@ -10,7 +10,7 @@ class GraphTimeDataset(Dataset): #get graph data at t time step
     def __init__(self, ts_df, flat_df, graph, window_size, time_index, label):
         super().__init__()
         self.ts = ts_df.sort_values(by=['건물번호', '일시'], ignore_index=True)
-        self.flat = flat_df
+        self.flat = torch.tensor(flat_df.values, dtype=torch.float)        
         self.window_size = window_size
         self.time_index = time_index
         self.drop = ['num_date_time', '건물번호', '일시']
@@ -26,14 +26,13 @@ class GraphTimeDataset(Dataset): #get graph data at t time step
 
         data = np.array([group.drop(columns = [self.label] + self.drop).values for _, group in ts_data.groupby('건물번호')])
 
-        dict_data = {'node_feat': torch.tensor(data, dtype=torch.float), #(window_size, feat_dim),
-                     'flat': torch.tensor(self.flat.values, dtype=torch.float),
+        dict_data = {'x': torch.tensor(data, dtype=torch.float), #(window_size, feat_dim),
                      'y': torch.tensor(ts_data[ts_data['일시']==self.time_index[index]][self.label].values, dtype=torch.float)}
                 
         if self.graph is not None:
             dict_data['edge_index'] = self.graph.edge_index
 
         if self.graph is not None and self.graph.edge_weight is not None:
-            dict_data['edge_weight'] = self.graph.edge_weight
+            dict_data['edge_attr'] = self.graph.edge_weight
 
-        return dict_data
+        return Data(**dict_data)
