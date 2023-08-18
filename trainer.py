@@ -65,11 +65,11 @@ class Trainer():
             loss.backward()
             self.optimizer.step()
 
-            total_loss += loss.item() * self.batch['x'].shape[0]
+            total_loss += loss.item() * batch['x'].shape[0]
             total_smape += smape(
                 self.scaling_fn(y.detach().cpu().numpy()), 
                 self.scaling_fn(output.detach().cpu().numpy())
-            ) * self.batch['x'].shape[0]
+            ) * batch['x'].shape[0]
         
         return total_loss/self.len_train, total_smape/self.len_train
     
@@ -92,11 +92,11 @@ class Trainer():
                 ) 
                 loss = self.loss_fn(output, y)
 
-                total_loss += loss.item() * self.batch['x'].shape[0]
+                total_loss += loss.item() * batch['x'].shape[0]
                 total_smape += smape(
                     self.scaling_fn(y.detach().cpu().numpy()), 
                     self.scaling_fn(output.detach().cpu().numpy())
-                ) * self.batch['x'].shape[0]
+                ) * batch['x'].shape[0]
                 
         return total_loss/self.len_valid, total_smape/self.len_valid
     
