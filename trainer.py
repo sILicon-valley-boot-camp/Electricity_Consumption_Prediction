@@ -108,7 +108,7 @@ class Trainer():
             for batch in test_loader:
                 del batch['y']; del batch['batch']; del batch['ptr']
                 batch = batch.to(self.device)
-                flat = self.test_loader.dataset.flat.to(self.device)
+                flat = test_loader.dataset.flat.to(self.device)
 
                 output = self.model(
                     node_feat=batch['x'], 
