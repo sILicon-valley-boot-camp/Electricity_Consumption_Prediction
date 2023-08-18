@@ -9,7 +9,7 @@ from sklearn.model_selection import StratifiedKFold, KFold
 import torch
 from torch import optim
 #from torch.utils.data import DataLoader
-from torch_geometric.data import DataLoader
+from torch_geometric.loader import DataLoader
 
 import models
 from loss import get_loss
