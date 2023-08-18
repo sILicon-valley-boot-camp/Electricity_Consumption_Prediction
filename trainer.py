@@ -49,7 +49,7 @@ class Trainer():
         total_loss = 0
         total_smape = 0
         for batch in tqdm(self.train_loader, file=sys.stdout): #tqdm output will not be written to logger file(will only written to stdout)
-            del['batch']; del['ptr']
+            del batch['batch']; del batch['ptr']
             batch = batch.to(self.device)
             flat = self.train_loader.dataset.flat.to(self.device)
 
@@ -79,7 +79,7 @@ class Trainer():
             total_loss = 0
             total_smape = 0
             for batch in self.valid_loader:
-                del['batch']; del['ptr']
+                del batch['batch']; del batch['ptr']
                 batch = batch.to(self.device)
                 flat = self.valid_loader.dataset.flat.to(self.device)
                 
@@ -106,7 +106,7 @@ class Trainer():
         with torch.no_grad():
             result = []
             for batch in test_loader:
-                del batch['y']; del['batch']; del['ptr']
+                del batch['y']; del batch['batch']; del batch['ptr']
                 batch = batch.to(self.device)
                 flat = self.test_loader.dataset.flat.to(self.device)
 
