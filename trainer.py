@@ -115,10 +115,9 @@ class Trainer():
                     flat=flat, 
                     edge_index=batch['edge_index'] if 'edge_index' in batch.keys else None, 
                     edge_weight=batch['edge_attr'] if 'edge_attr' in batch.keys else None
-                ) 
+                ).detach().cpu().unsqueeze(-1).reshape(-1, 100).numpy()
                 
-                output = self.model(**batch).detach().cpu().unsqueeze(-1).numpy()
                 result.append(output)
 
-        result_array = np.stack(result,axis=0).T.reshape(-1, 1)
+        result_array = np.concat(result,axis=0).T.reshape(-1, 1)
         return self.scaling_fn(result_array)
