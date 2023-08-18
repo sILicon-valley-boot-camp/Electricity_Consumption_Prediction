@@ -119,5 +119,5 @@ class Trainer():
                 
                 result.append(output)
 
-        result_array = np.concat(result,axis=0).T.reshape(-1, 1)
+        result_array = np.concatenate(result,axis=0).T.reshape(-1, 1)
         return self.scaling_fn(result_array)
