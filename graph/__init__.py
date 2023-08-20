@@ -4,7 +4,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 from .knn import create_knn
-from .weighted_graph import create_weighted_graph 
+from .weighted_graph import create_weighted_graph, create_weighted_knn
 
 def get_graph(args, time_series, flat, result_path):
     graph_type = nx.Graph if args.graph_type=='graph' else nx.DiGraph
@@ -29,10 +29,12 @@ def get_graph(args, time_series, flat, result_path):
         print('using default graph')
         feature = flat.values
 
+    if 'knn' in args.graph and 'weighted' in args.graph:
+        graph = create_weighted_knn(feature, args.k, metric=args.sim, graph_type=graph_type)
     if 'knn' in args.graph:
         graph = create_knn(feature, args.k, metric=args.sim, graph_type=graph_type)
     elif 'weighted' in args.graph:
-        graph = create_weighted_graph(feature, metric=args.sim, graph_type=graph_type)
+        graph = create_weighted_graph(feature, metric=args.sim, graph_type=graph_type) # an fully connected graph with weight matrix
     else:
         raise 'graph not defined'
         
