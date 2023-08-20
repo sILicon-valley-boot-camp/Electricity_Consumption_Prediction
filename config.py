@@ -32,6 +32,7 @@ def args_for_graph(parser):
     parser.add_argument('--graph', type=str, default='knn')
     parser.add_argument('--k', type=int, default=5)
     parser.add_argument('--sim', type=str, default='minkowski')
+    parser.add_argument('--graph_type', type=str, default='graph', choices=['graph', 'directed'])
 
 def get_args():
     parser = argparse.ArgumentParser()
