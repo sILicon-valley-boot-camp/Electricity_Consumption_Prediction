@@ -32,7 +32,7 @@ class GraphTimeDataset(Dataset): #get graph data at t time step
         if self.graph is not None:
             dict_data['edge_index'] = self.graph.edge_index
 
-        if self.graph is not None and self.graph.edge_weight is not None:
-            dict_data['edge_attr'] = self.graph.edge_weight
+        if self.graph is not None and self.graph.weight is not None:
+            dict_data['edge_attr'] = self.graph.weight
 
         return Data(**dict_data)
