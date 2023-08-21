@@ -50,6 +50,7 @@ def get_args():
     args_for_loss(parser)
     args_for_scaler(parser)
     args_for_graph(parser)
+    args_for_tuning(parser)
     _args, _ = parser.parse_known_args()
     args_for_model(parser, _args.model, _args.GNN)
 
