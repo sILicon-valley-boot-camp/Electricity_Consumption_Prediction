@@ -43,13 +43,14 @@ def args_for_tuning(parser):
 
 def args_for_config_file(parser):
     parser.add_argument('--config', default=None, type=str, help='read from config file')
-    parser.add_argument('--target_args', nargs='*', help='target args to change from config file')
+    parser.add_argument('--target_args', nargs='*', default=[], help='target args to change from config file')
 
 def modify_args(config_args, args):
-    for key in args.target_args:
+    for key in args['target_args']:
         try:
             if config_args[key] != args[key]:
                 print(f'using {args[key]} for {key}')
+                config_args[key] = args[key]
         except KeyError:
             print(f'added {key}')
             config_args[key] = args[key]
