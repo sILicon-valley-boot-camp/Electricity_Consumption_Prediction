@@ -180,5 +180,5 @@ if __name__ == '__main__':
         ['plot_edf', 'plot_rank', 'plot_slice', 'plot_contour', 'plot_timeline', 'plot_param_importances', 'plot_intermediate_values', 'plot_parallel_coordinate', 'plot_optimization_history'],
         [plot_edf, plot_rank, plot_slice, plot_contour, plot_timeline, plot_param_importances, plot_intermediate_values, plot_parallel_coordinate, plot_optimization_history]
     ):
-        vis(study)
-        plt.savefig(os.path.join(path, f'{method}.png'))
+        fig =vis(study)
+        fig.savefig(os.path.join(path, f'{method}.png'))
