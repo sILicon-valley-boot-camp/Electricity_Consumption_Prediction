@@ -48,6 +48,7 @@ class Trainer():
 
             if self.trial is not None and self.trial.should_prune():
                 raise optuna.exceptions.TrialPruned()
+        return best
 
     def train_step(self, epoch):
         self.model.train()
@@ -106,7 +107,7 @@ class Trainer():
 
         
         if self.trial is not None:
-            self.trial.report(total_smape/self.len_valid, epoch)
+            self.trial.report(total_loss/self.len_valid, epoch)
                 
         return total_loss/self.len_valid, total_smape/self.len_valid
     
