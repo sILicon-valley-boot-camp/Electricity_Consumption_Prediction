@@ -9,7 +9,7 @@ from utils import smape
 
 class Trainer():
     def __init__(self, train_loader, valid_loader, model, loss_fn, optimizer, scheduler, scaling_fn, device, patience, epochs, result_path, fold_logger, len_train, len_valid, trial=None):
-        self.train_loader = train_loader
+        self.train_loader = tqdm(train_loader, file=sys.stdout) if trial is not None else train_loader
         self.valid_loader = valid_loader
         self.model = model
         self.loss_fn = loss_fn
@@ -24,7 +24,7 @@ class Trainer():
         self.len_train = len_train
         self.len_valid = len_valid
         self.trial = trial
-    
+        
     def train(self):
         best = np.inf
         for epoch in range(1,self.epochs+1):
@@ -53,7 +53,7 @@ class Trainer():
 
         total_loss = 0
         total_smape = 0
-        for batch in tqdm(self.train_loader, file=sys.stdout): #tqdm output will not be written to logger file(will only written to stdout)
+        for batch in self.train_loader:
             del batch['batch']; del batch['ptr']
             batch = batch.to(self.device)
             flat = self.train_loader.dataset.flat.to(self.device)

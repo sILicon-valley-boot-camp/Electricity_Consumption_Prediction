@@ -22,16 +22,17 @@ from lr_scheduler import get_sch
 from data import GraphTimeDataset
 from utils import seed_everything, handle_unhandled_exception, save_to_json
 
-def main(args, trial):
+def main(trial, args=None):
     args = tune_args(args, trial)
     seed_everything(args.seed) #fix seed
     device = torch.device('cuda:0') #use cuda:0
 
-    result_path = os.path.join(args.result_path, 'tuning', args.comment + '_' + args.model + args.GNN + '_' + str(len(os.listdir(args.result_path))))
+    result_path = os.path.join(args.result_path, 'tuning'+str(len(os.listdir(args.result_path))), args.comment + '_' + args.model + args.GNN + '_' + str(trial.number))
     os.makedirs(result_path)
     
     logging.basicConfig(level=logging.INFO, format='%(message)s')
     logger = logging.getLogger()
+    logger.handlers.clear()
     logger.addHandler(logging.FileHandler(os.path.join(result_path, 'log.log')))    
     logger.info(args)
     save_to_json(vars(args), os.path.join(result_path, 'config.json'))
@@ -78,10 +79,7 @@ def main(args, trial):
 
     graph = get_graph(args, train_data, flat_data, result_path) if args.graph != 'node_emb' else None
 
-    train_index, valid_index = train_test_split(train_time, train_size=int(train_data_length * args.train_ratio), random_state=args.seed, shuffle=True)
-
-    kfold_train_time = train_time[train_index]
-    kfold_valid_time = train_time[valid_index]
+    kfold_train_time, kfold_valid_time = train_test_split(train_time, train_size=int(train_data_length * args.train_ratio), random_state=args.seed, shuffle=True)
 
     logger.info(f'start training')
 
@@ -145,8 +143,8 @@ def tune_args(args, trial):
 if __name__ == '__main__':
     args = get_args()
     objective =  partial(main,args=args)
-    study = optuna.create_study(direction="minimize")
-    study.optimize(objective, n_trials=args.n_trials, timeout=args.timeout, n_jobs=-1, pruner=optuna.pruners.HyperbandPruner())
+    study = optuna.create_study(direction="minimize", sampler=optuna.samplers.TPESampler(), pruner=optuna.pruners.HyperbandPruner())
+    study.optimize(objective, n_trials=args.n_trials, timeout=args.timeout, n_jobs=-1)
 
     pruned_trials = study.get_trials(deepcopy=False, states=[optuna.trial.TrialState.PRUNED])
     complete_trials = study.get_trials(deepcopy=False, states=[optuna.trial.TrialState.COMPLETE])
