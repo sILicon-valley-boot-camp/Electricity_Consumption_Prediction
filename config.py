@@ -16,7 +16,6 @@ def args_for_data(parser):
 def args_for_train(parser):
     parser.add_argument('--comment', type=str, default='')
     parser.add_argument('--cv_k', type=int, default=10, help='k-fold stratified cross validation')
-    parser.add_argument('--train_ratio', type=float, default=0.7, help='train test split ratio(only used in hyper-parmeter tuning)')
     parser.add_argument('--num_workers', type=int, default=4, help='num_workers')
     parser.add_argument('--batch_size', type=int, default=None, help='batch_size')
     parser.add_argument('--epochs', type=int, default=1000, help='max epochs')
@@ -34,6 +33,11 @@ def args_for_graph(parser):
     parser.add_argument('--k', type=int, default=5)
     parser.add_argument('--sim', type=str, default='minkowski')
     parser.add_argument('--graph_type', type=str, default='graph', choices=['graph', 'directed'])
+
+def args_for_tuning(parser):
+    parser.add_argument('--train_ratio', type=float, default=0.7, help='train test split ratio(only used in hyper-parmeter tuning)')
+    parser.add_argument('--n_trials', type=int, default=None, help='n_trials')
+    parser.add_argument('--timeout', type=int, default=None, help='optuna training timeout(sec)')
 
 def get_args():
     parser = argparse.ArgumentParser()
