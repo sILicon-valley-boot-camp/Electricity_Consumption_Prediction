@@ -31,7 +31,7 @@ def get_graph(args, time_series, flat, result_path):
 
     if 'knn' in args.graph and 'weighted' in args.graph:
         graph = create_weighted_knn(feature, args.k, metric=args.sim, graph_type=graph_type)
-    if 'knn' in args.graph:
+    elif 'knn' in args.graph:
         graph = create_knn(feature, args.k, metric=args.sim, graph_type=graph_type)
     elif 'weighted' in args.graph:
         graph = create_weighted_graph(feature, metric=args.sim, graph_type=graph_type) # an fully connected graph with weight matrix
