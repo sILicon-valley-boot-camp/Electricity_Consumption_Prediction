@@ -115,7 +115,7 @@ def tune_args(args, trial):
 
     # model
     args.model = trial.suggest_categorical("model", ['LSTM', 'GRU'])
-    args.GNN = trial.suggest_categorical("GNN", ["GCN", "GraphSAGE", "GIN", "GAT", "PNA", "EdgeCNN"])
+    args.GNN = trial.suggest_categorical("GNN", ["GCN", "GraphSAGE", "GIN", "GAT", "EdgeCNN"])
     
     # LSTM & GRU
     args.pooling = trial.suggest_categorical("pooling", ['mean', 'max', 'last', 'first', 'all'])
