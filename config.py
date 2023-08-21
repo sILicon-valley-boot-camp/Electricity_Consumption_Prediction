@@ -41,17 +41,23 @@ def args_for_tuning(parser):
     parser.add_argument('--timeout', type=int, default=None, help='optuna training timeout(sec)')
     parser.add_argument('--n_job_parallel', type=int, default=1, help='n_job_parallel')
 
+def args_for_config_file(parser):
+    parser.add_argument('--config', default=None, type=str, help='read from config file')
+    parser.add_argument('--target_args', nargs='*', help='target args to change from config file')
+
+def modify_args(config_args, args):
+    for key in args.target_args:
+        try:
+            if config_args[key] != args[key]:
+                print(f'using {args[key]} for {key}')
+        except KeyError:
+            print(f'added {key}')
+            config_args[key] = args[key]
+
+    return argparse.Namespace(**config_args)
+
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config', default=None, type=str, help='read from config file')
-    _args, _ = parser.parse_known_args()
-
-    if _args.config is not None:
-        print('only arguments in config file will be used')
-        with open(_args.config) as json_file:
-            config_args = argparse.Namespace(**json.load(json_file))
-        return config_args
-
     parser.add_argument('--seed', default=42, type=int)
     parser.add_argument('--model', default='LSTM', type=str)
     parser.add_argument('--GNN', default='GAT', type=str)
@@ -62,8 +68,15 @@ def get_args():
     args_for_scaler(parser)
     args_for_graph(parser)
     args_for_tuning(parser)
+    args_for_config_file(parser)
+
     _args, _ = parser.parse_known_args()
     args_for_model(parser, _args.model, _args.GNN)
-
     args = parser.parse_args()
+    
+    if args.config is not None:
+        with open(args.config) as json_file:
+            config_args = argparse.Namespace(**json.load(json_file))
+        args = modify_args(config_args.__dict__, args.__dict__)
+
     return args
