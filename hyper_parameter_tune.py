@@ -128,8 +128,10 @@ def tune_args(args, trial):
     args.gnn_n_layers = trial.suggest_int("gnn_n_layers", 1, 3)
     args.gnn_output_size = trial.suggest_int("gnn_output_size", 10, 512)
     args.gnn_drop_p = trial.suggest_float("gnn_drop_p", 0.2, 0.8)
-    args.norm = trial.suggest_categorical("norm", ["BatchNorm", "InstanceNorm", "LayerNorm", None])
-    args.jk = trial.suggest_categorical("jk", ["cat", "max", "lstm", None])
+    args.norm = trial.suggest_categorical("norm", ["BatchNorm", "InstanceNorm", "LayerNorm", "None"])
+    args.norm = None if args.norm=="None" else args.norm
+    args.jk = trial.suggest_categorical("jk", ["cat", "max", "lstm", "None"])
+    args.jk = None if args.jk=="None" else args.jk
     args.emb_dim = trial.suggest_int("emb_dim", 10, 512)
     # args.flat_out = trial.suggest_int("flat_out", 10, 512)
     # args.gnn_input = trial.suggest_categorical("gnn_input", [])
