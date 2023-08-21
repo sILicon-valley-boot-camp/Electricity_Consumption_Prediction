@@ -4,7 +4,6 @@ import optuna
 import logging
 import pandas as pd
 from functools import partial
-import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 
@@ -122,10 +121,11 @@ def tune_args(args, trial):
     args.lr = trial.suggest_float("lr", 1e-5, 1e-2)
 
     # graph
-    args.graph = trial.suggest_categorical("graph", ["EU_ts_weighted_knn", "ts_all_weighted_knn", "EU_ts_knn", "ts_all_knn"])
+    args.graph = trial.suggest_categorical("graph", ["EU_ts_weighted_knn", "ts_all_weighted_knn"])
     args.k = trial.suggest_int("k", 2, 90)
     args.sim = trial.suggest_categorical("sim", ['minkowski', 'cosine'])
-    args.graph_type = trial.suggest_categorical("graph_type", ['graph', 'directed'])
+    #args.graph_type = trial.suggest_categorical("graph_type", ['graph', 'directed'])
+    args.graph = 'directed'
 
     # model
     args.model = trial.suggest_categorical("model", ['LSTM', 'GRU'])
@@ -184,4 +184,4 @@ if __name__ == '__main__':
         [plot_edf, plot_rank, plot_slice, plot_contour, plot_timeline, plot_param_importances, plot_intermediate_values, plot_parallel_coordinate, plot_optimization_history]
     ):
         fig = vis(study)
-        fig.write_image(file=os.path.join(path, f'{method}.png'), format='png')
+        fig.write_image(file=os.path.join(path, f'{method}.png'), format='png') 
