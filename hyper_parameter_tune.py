@@ -77,7 +77,7 @@ def main(trial, args=None):
 
     graph = get_graph(args, train_data, flat_data, result_path) if args.graph != 'node_emb' else None
 
-    kfold_train_time, kfold_valid_time = train_test_split(train_time, train_size=int(train_data_length * args.train_ratio), random_state=args.seed, shuffle=True)
+    kfold_train_time, kfold_valid_time = train_test_split(train_time, test_size=int(train_data_length * args.test_ratio), random_state=args.seed, shuffle=True)
 
     logger.info(f'start training')
 

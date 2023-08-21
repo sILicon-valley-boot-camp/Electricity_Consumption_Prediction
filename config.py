@@ -1,3 +1,4 @@
+import json
 import argparse
 
 from loss import args_for_loss
@@ -35,13 +36,22 @@ def args_for_graph(parser):
     parser.add_argument('--graph_type', type=str, default='graph', choices=['graph', 'directed'])
 
 def args_for_tuning(parser):
-    parser.add_argument('--train_ratio', type=float, default=0.7, help='train test split ratio(only used in hyper-parmeter tuning)')
+    parser.add_argument('--test_ratio', type=float, default=0.3, help='train test split ratio(only used in hyper-parmeter tuning)')
     parser.add_argument('--n_trials', type=int, default=None, help='n_trials')
     parser.add_argument('--timeout', type=int, default=None, help='optuna training timeout(sec)')
     parser.add_argument('--n_job_parallel', type=int, default=1, help='n_job_parallel')
 
 def get_args():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--config', default=None, type=str, help='read from config file')
+    _args, _ = parser.parse_known_args()
+
+    if _args.config is not None:
+        print('only arguments in config file will be used')
+        with open(_args.config) as json_file:
+            config_args = argparse.Namespace(**json.load(json_file))
+        return config_args
+
     parser.add_argument('--seed', default=42, type=int)
     parser.add_argument('--model', default='LSTM', type=str)
     parser.add_argument('--GNN', default='GAT', type=str)
