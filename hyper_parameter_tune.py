@@ -42,7 +42,7 @@ def main(trial, args=None):
     os.makedirs(result_path)
     
     logging.basicConfig(level=logging.INFO, format='%(message)s')
-    logger = logging.getLogger()
+    logger = logging.getLogger(str(trial.number))
     logger.handlers.clear()
     logger.addHandler(logging.FileHandler(os.path.join(result_path, 'log.log')))    
     logger.info(args)
