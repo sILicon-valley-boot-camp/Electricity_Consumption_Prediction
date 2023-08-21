@@ -30,9 +30,7 @@ def main(trial, args=None):
     result_path = os.path.join(args.result_path, 'tuning'+str(len(os.listdir(args.result_path))), args.comment + '_' + args.model + args.GNN + '_' + str(trial.number))
     os.makedirs(result_path)
     
-    logging.basicConfig(level=logging.INFO, format='%(message)s')
-    logger = logging.getLogger()
-    logger.handlers.clear()
+    logger = optuna.logging.get_logger(__name__)
     logger.addHandler(logging.FileHandler(os.path.join(result_path, 'log.log')))    
     logger.info(args)
     save_to_json(vars(args), os.path.join(result_path, 'config.json'))
