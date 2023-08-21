@@ -41,8 +41,8 @@ def main(trial, args=None):
     result_path = os.path.join(args.result_path, args.comment + '_' + args.model + args.GNN + '_' + str(trial.number))
     os.makedirs(result_path)
     
-    optuna.logging.set_verbosity(optuna.logging.INFO)
-    logger = optuna.logging.get_logger(__name__)
+    logging.basicConfig(level=logging.INFO, format='%(message)s')
+    logger = logging.getLogger()
     logger.addHandler(logging.FileHandler(os.path.join(result_path, 'log.log')))    
     logger.info(args)
     save_to_json(vars(args), os.path.join(result_path, 'config.json'))
