@@ -41,6 +41,7 @@ def main(trial, args=None):
     result_path = os.path.join(args.result_path, args.comment + '_' + args.model + args.GNN + '_' + str(trial.number))
     os.makedirs(result_path)
     
+    optuna.logging.set_verbosity(optuna.logging.INFO)
     logger = optuna.logging.get_logger(__name__)
     logger.addHandler(logging.FileHandler(os.path.join(result_path, 'log.log')))    
     logger.info(args)
