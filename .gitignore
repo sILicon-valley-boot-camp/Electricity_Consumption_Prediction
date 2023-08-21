@@ -160,3 +160,4 @@ cython_debug/
 #.idea/
 EDA.ipynb
 GraphTest.ipynb
+best_mode.json

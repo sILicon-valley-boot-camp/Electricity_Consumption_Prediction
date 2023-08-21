@@ -1,13 +1,14 @@
 import os
 import sys
 import torch
+import optuna
 import numpy as np
 from tqdm import tqdm
 
 from utils import smape
 
 class Trainer():
-    def __init__(self, train_loader, valid_loader, model, loss_fn, optimizer, scheduler, scaling_fn, device, patience, epochs, result_path, fold_logger, len_train, len_valid):
+    def __init__(self, train_loader, valid_loader, model, loss_fn, optimizer, scheduler, scaling_fn, device, patience, epochs, result_path, fold_logger, len_train, len_valid, trial=None):
         self.train_loader = train_loader
         self.valid_loader = valid_loader
         self.model = model
@@ -22,12 +23,13 @@ class Trainer():
         self.best_model_path = os.path.join(result_path, 'best_model.pt')
         self.len_train = len_train
         self.len_valid = len_valid
+        self.trial = trial
     
     def train(self):
         best = np.inf
         for epoch in range(1,self.epochs+1):
-            loss_train, smape_train = self.train_step()
-            loss_val, smape_valid = self.valid_step()
+            loss_train, smape_train = self.train_step(epoch)
+            loss_val, smape_valid = self.valid_step(epoch)
             self.scheduler.step()
 
             self.logger.info(f'Epoch {str(epoch).zfill(5)}: t_loss:{loss_train:.3f} t_smape:{smape_train:.3f} v_loss:{loss_val:.3f} v_smape:{smape_valid:.3f}')
@@ -43,7 +45,10 @@ class Trainer():
             if bad_counter == self.patience:
                 break
 
-    def train_step(self):
+            if self.trial is not None and self.trial.should_prune():
+                raise optuna.exceptions.TrialPruned()
+
+    def train_step(self, epoch):
         self.model.train()
 
         total_loss = 0
@@ -73,7 +78,7 @@ class Trainer():
         
         return total_loss/self.len_train, total_smape/self.len_train
     
-    def valid_step(self):
+    def valid_step(self, epoch):
         self.model.eval()
         with torch.no_grad():
             total_loss = 0
@@ -97,6 +102,10 @@ class Trainer():
                     self.scaling_fn(y.detach().cpu().numpy()), 
                     self.scaling_fn(output.detach().cpu().numpy())
                 ) * (batch['x'].shape[0]//100)
+
+        
+        if self.trial is not None:
+            self.trial.report(total_smape/self.len_valid, epoch)
                 
         return total_loss/self.len_valid, total_smape/self.len_valid
     
