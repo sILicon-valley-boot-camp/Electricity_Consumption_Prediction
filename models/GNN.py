@@ -25,9 +25,15 @@ class RnnGnn(nn.Module):
 
         args_gnn = {}
         if args.GNN == 'GAT':
-            args_gnn = {'v2':args.v2}
+            try:
+                args_gnn = {'v2':args.v2}
+            except AttributeError:
+                args_gnn = {'v2':True}
         elif args.GNN == 'GraphSAGE':
-            args_gnn = {'aggr':args.aggr}
+            try:
+                args_gnn = {'aggr':args.aggr}
+            except AttributeError:
+                args_gnn = {'aggr':"mean"}
 
         self.gnn = getattr(g_nn , args.GNN)(
             in_channels=gnn_in, hidden_channels=args.gnn_hidden, num_layers=args.gnn_n_layers, 
