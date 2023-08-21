@@ -9,7 +9,7 @@ from utils import smape
 
 class Trainer():
     def __init__(self, train_loader, valid_loader, model, loss_fn, optimizer, scheduler, scaling_fn, device, patience, epochs, result_path, fold_logger, len_train, len_valid, trial=None):
-        self.train_loader = tqdm(train_loader, file=sys.stdout) if trial is not None else train_loader
+        self.train_loader = tqdm(train_loader, file=sys.stdout) if trial is None else train_loader
         self.valid_loader = valid_loader
         self.model = model
         self.loss_fn = loss_fn

@@ -144,7 +144,7 @@ if __name__ == '__main__':
     args = get_args()
     objective =  partial(main,args=args)
     study = optuna.create_study(direction="minimize", sampler=optuna.samplers.TPESampler(), pruner=optuna.pruners.HyperbandPruner())
-    study.optimize(objective, n_trials=args.n_trials, timeout=args.timeout, n_jobs=-1)
+    study.optimize(objective, n_trials=args.n_trials, timeout=args.timeout, n_jobs=args.n_job_parallel)
 
     pruned_trials = study.get_trials(deepcopy=False, states=[optuna.trial.TrialState.PRUNED])
     complete_trials = study.get_trials(deepcopy=False, states=[optuna.trial.TrialState.COMPLETE])

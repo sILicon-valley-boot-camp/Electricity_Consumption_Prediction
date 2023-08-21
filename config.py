@@ -38,6 +38,7 @@ def args_for_tuning(parser):
     parser.add_argument('--train_ratio', type=float, default=0.7, help='train test split ratio(only used in hyper-parmeter tuning)')
     parser.add_argument('--n_trials', type=int, default=None, help='n_trials')
     parser.add_argument('--timeout', type=int, default=None, help='optuna training timeout(sec)')
+    parser.add_argument('--n_job_parallel', type=int, default=1, help='n_job_parallel')
 
 def get_args():
     parser = argparse.ArgumentParser()
