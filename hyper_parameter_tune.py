@@ -20,7 +20,7 @@ from trainer import Trainer
 from scaler import get_scaler
 from lr_scheduler import get_sch
 from data import GraphTimeDataset
-from utils import seed_everything, handle_unhandled_exception, save_to_json
+from utils import seed_everything, handle_unhandled_exception, save_to_json, SaveStudyCallback
 
 def main(trial, args=None):
     args = tune_args(args, trial)
@@ -140,9 +140,12 @@ def tune_args(args, trial):
 
 if __name__ == '__main__':
     args = get_args()
+    path = os.path.join(args.result_path, 'tuning'+str(len(os.listdir(args.result_path))))
+    os.makedirs(path)
+
     objective =  partial(main,args=args)
     study = optuna.create_study(direction="minimize", sampler=optuna.samplers.TPESampler(), pruner=optuna.pruners.HyperbandPruner())
-    study.optimize(objective, n_trials=args.n_trials, timeout=args.timeout, n_jobs=args.n_job_parallel)
+    study.optimize(objective, n_trials=args.n_trials, timeout=args.timeout, n_jobs=args.n_job_parallel, callbacks=[SaveStudyCallback(path)])
 
     pruned_trials = study.get_trials(deepcopy=False, states=[optuna.trial.TrialState.PRUNED])
     complete_trials = study.get_trials(deepcopy=False, states=[optuna.trial.TrialState.COMPLETE])

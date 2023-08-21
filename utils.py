@@ -2,6 +2,8 @@ import os
 import sys
 import json
 import torch
+import joblib
+import optuna
 import random
 import numpy as np
 
@@ -31,3 +33,11 @@ def handle_unhandled_exception(exc_type, exc_value, exc_traceback, logger=None):
 def save_to_json(data, file_name):
     with open(file_name, 'w') as fp:
         json.dump(data, fp)
+
+class SaveStudyCallback:
+    def __init__(self, path):
+        self.path = path
+
+    def __call__(self, study: optuna.study.Study, trial: optuna.trial.FrozenTrial) -> None:
+        i = trial.number
+        joblib.dump(study, os.path.join(self.path, f"study.pkl"))
