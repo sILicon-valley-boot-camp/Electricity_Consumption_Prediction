@@ -19,7 +19,7 @@ from trainer import Trainer
 from scaler import get_scaler
 from lr_scheduler import get_sch
 from data import GraphTimeDataset
-from utils import seed_everything, handle_unhandled_exception
+from utils import seed_everything, handle_unhandled_exception, save_to_json
 
 if __name__ == "__main__":
     args = get_args()
@@ -36,8 +36,8 @@ if __name__ == "__main__":
     logger = logging.getLogger()
     logger.addHandler(logging.FileHandler(os.path.join(result_path, 'log.log')))    
     logger.info(args)
+    save_to_json(vars(args), os.path.join(result_path, 'config.json'))
     sys.excepthook = partial(handle_unhandled_exception,logger=logger)
-
 
     flat_data = pd.read_csv(args.flat)
     args.flat_dim = len(flat_data.columns)

@@ -1,5 +1,6 @@
 import os
 import sys
+import json
 import torch
 import random
 import numpy as np
@@ -27,3 +28,6 @@ def handle_unhandled_exception(exc_type, exc_value, exc_traceback, logger=None):
         #Create a critical level log message with info from the except hook.
     logger.critical("Unhandled exception", exc_info=(exc_type, exc_value, exc_traceback))
 
+def save_to_json(data, file_name):
+    with open(file_name, 'w') as fp:
+        json.dump(data, fp)
