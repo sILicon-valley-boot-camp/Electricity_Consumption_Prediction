@@ -4,6 +4,7 @@ import optuna
 import logging
 import pandas as pd
 from functools import partial
+import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 
@@ -21,6 +22,16 @@ from scaler import get_scaler
 from lr_scheduler import get_sch
 from data import GraphTimeDataset
 from utils import seed_everything, handle_unhandled_exception, save_to_json, SaveStudyCallback
+
+from optuna.visualization import plot_edf
+from optuna.visualization import plot_rank
+from optuna.visualization import plot_slice
+from optuna.visualization import plot_contour
+from optuna.visualization import plot_timeline
+from optuna.visualization import plot_param_importances
+from optuna.visualization import plot_intermediate_values
+from optuna.visualization import plot_parallel_coordinate
+from optuna.visualization import plot_optimization_history
 
 def main(trial, args=None):
     args = tune_args(args, trial)
@@ -163,3 +174,10 @@ if __name__ == '__main__':
     print("  Params: ")
     for key, value in trial.params.items():
         print("    {}: {}".format(key, value))
+
+    for method, vis in zip(
+        ['plot_edf', 'plot_rank', 'plot_slice', 'plot_contour', 'plot_timeline', 'plot_param_importances', 'plot_intermediate_values', 'plot_parallel_coordinate', 'plot_optimization_history'],
+        [plot_edf, plot_rank, plot_slice, plot_contour, plot_timeline, plot_param_importances, plot_intermediate_values, plot_parallel_coordinate, plot_optimization_history]
+    ):
+        vis(study)
+        plt.savefig(os.path.join(path, f'{method}.png'))
