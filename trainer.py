@@ -16,6 +16,7 @@ class Trainer():
         self.optimizer = optimizer
         self.scheduler = scheduler
         self.scaling_fn = scaling_fn
+        self.flat = train_loader.dataset.flat
         self.device = device
         self.patience = patience
         self.epochs = epochs
@@ -56,7 +57,7 @@ class Trainer():
         for batch in self.train_loader:
             del batch['batch']; del batch['ptr']
             batch = batch.to(self.device)
-            flat = self.train_loader.dataset.flat.to(self.device)
+            flat = self.flat.to(self.device)
 
             y = batch.pop('y').reshape(-1, 1)
             self.optimizer.zero_grad()
