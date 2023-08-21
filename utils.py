@@ -18,7 +18,7 @@ def seed_everything(seed: int):
     torch.backends.cudnn.benchmark = True
 
 def smape(true, pred):
-    v = 2 * abs(pred - true) / (abs(pred) + abs(true))
+    v = 2 * abs(pred - true) / ((abs(pred) + abs(true)) + 1e-9)
     output = np.mean(v) * 100
     return output
 
