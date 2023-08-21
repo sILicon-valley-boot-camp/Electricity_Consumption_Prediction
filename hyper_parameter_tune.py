@@ -1,5 +1,6 @@
 import os
 import sys
+import joblib
 import optuna
 import logging
 import pandas as pd
@@ -20,7 +21,7 @@ from trainer import Trainer
 from scaler import get_scaler
 from lr_scheduler import get_sch
 from data import GraphTimeDataset
-from utils import seed_everything, handle_unhandled_exception, save_to_json, SaveStudyCallback
+from utils import seed_everything, handle_unhandled_exception, save_to_json
 
 from optuna.visualization import plot_edf
 from optuna.visualization import plot_rank
@@ -31,6 +32,24 @@ from optuna.visualization import plot_param_importances
 from optuna.visualization import plot_intermediate_values
 from optuna.visualization import plot_parallel_coordinate
 from optuna.visualization import plot_optimization_history
+
+class SaveVisCallback:
+    def __init__(self, path):
+        self.path = path
+
+    def visualize_optuna(self, study):
+        for method, vis in zip(
+            ['plot_edf', 'plot_rank', 'plot_slice', 'plot_contour', 'plot_timeline', 'plot_param_importances', 'plot_intermediate_values', 'plot_parallel_coordinate', 'plot_optimization_history'],
+            [plot_edf, plot_rank, plot_slice, plot_contour, plot_timeline, plot_param_importances, plot_intermediate_values, plot_parallel_coordinate, plot_optimization_history]
+         ):
+            fig = vis(study)
+            fig.write_image(file=os.path.join(self.path, f'{method}.png'), format='png') 
+
+    def __call__(self, study: optuna.study.Study, trial: optuna.trial.FrozenTrial) -> None:
+        joblib.dump(study, os.path.join(self.path, f"study.pkl"))
+
+        if (trial+1) % 10 == 0:
+            self.visualize_optuna(study)
 
 def main(trial, args=None):
     args = tune_args(args, trial)
@@ -159,8 +178,9 @@ if __name__ == '__main__':
     os.makedirs(path)
 
     objective =  partial(main,args=args)
+    callback = SaveVisCallback(path)
     study = optuna.create_study(direction="minimize", sampler=optuna.samplers.TPESampler(), pruner=optuna.pruners.HyperbandPruner())
-    study.optimize(objective, n_trials=args.n_trials, timeout=args.timeout, n_jobs=args.n_job_parallel, callbacks=[SaveStudyCallback(path)])
+    study.optimize(objective, n_trials=args.n_trials, timeout=args.timeout, n_jobs=args.n_job_parallel, callbacks=[callback])
 
     pruned_trials = study.get_trials(deepcopy=False, states=[optuna.trial.TrialState.PRUNED])
     complete_trials = study.get_trials(deepcopy=False, states=[optuna.trial.TrialState.COMPLETE])
@@ -179,9 +199,4 @@ if __name__ == '__main__':
     for key, value in trial.params.items():
         print("    {}: {}".format(key, value))
 
-    for method, vis in zip(
-        ['plot_edf', 'plot_rank', 'plot_slice', 'plot_contour', 'plot_timeline', 'plot_param_importances', 'plot_intermediate_values', 'plot_parallel_coordinate', 'plot_optimization_history'],
-        [plot_edf, plot_rank, plot_slice, plot_contour, plot_timeline, plot_param_importances, plot_intermediate_values, plot_parallel_coordinate, plot_optimization_history]
-    ):
-        fig = vis(study)
-        fig.write_image(file=os.path.join(path, f'{method}.png'), format='png') 
+    callback.visualize_optuna(study)
