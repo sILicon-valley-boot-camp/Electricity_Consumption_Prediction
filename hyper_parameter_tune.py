@@ -118,7 +118,7 @@ def tune_args(args, trial):
     args.GNN = trial.suggest_categorical("GNN", ["GCN", "GraphSAGE", "GIN", "GAT", "EdgeCNN"])
     
     # LSTM & GRU
-    args.pooling = trial.suggest_categorical("pooling", ['mean', 'max', 'last', 'first', 'all'])
+    args.pooling = trial.suggest_categorical("pooling", ['mean', 'max', 'last', 'first'])
     args.dropout = trial.suggest_float("dropout", 0.2, 0.8)
     args.hidden = trial.suggest_int("hidden", 10, 512)
     args.num_layers = trial.suggest_int("num_layers", 1, 4)
