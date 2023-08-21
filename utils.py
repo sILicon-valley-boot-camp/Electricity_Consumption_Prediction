@@ -39,5 +39,4 @@ class SaveStudyCallback:
         self.path = path
 
     def __call__(self, study: optuna.study.Study, trial: optuna.trial.FrozenTrial) -> None:
-        i = trial.number
         joblib.dump(study, os.path.join(self.path, f"study.pkl"))

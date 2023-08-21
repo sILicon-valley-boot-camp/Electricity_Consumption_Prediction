@@ -38,7 +38,7 @@ def main(trial, args=None):
     seed_everything(args.seed) #fix seed
     device = torch.device('cuda:0') #use cuda:0
 
-    result_path = os.path.join(args.result_path, 'tuning'+str(len(os.listdir(args.result_path))), args.comment + '_' + args.model + args.GNN + '_' + str(trial.number))
+    result_path = os.path.join(args.result_path, args.comment + '_' + args.model + args.GNN + '_' + str(trial.number))
     os.makedirs(result_path)
     
     logger = optuna.logging.get_logger(__name__)
@@ -152,6 +152,7 @@ def tune_args(args, trial):
 if __name__ == '__main__':
     args = get_args()
     path = os.path.join(args.result_path, 'tuning'+str(len(os.listdir(args.result_path))))
+    args.result_path = path
     os.makedirs(path)
 
     objective =  partial(main,args=args)
