@@ -83,6 +83,13 @@ class Trainer():
                 self.scaling_fn(y.detach().cpu().numpy()), 
                 self.scaling_fn(output.detach().cpu().numpy())
             ) * (batch['x'].shape[0]//100)
+
+            if self.trial is not None: #optuna
+                    self.iter_cnt +=1
+                    self.trial.report(loss.item(), self.iter_cnt)
+                    
+                    if self.trial.should_prune():
+                        raise optuna.exceptions.TrialPruned()
         
         return total_loss/self.len_train, total_smape/self.len_train
     
@@ -110,13 +117,6 @@ class Trainer():
                     self.scaling_fn(y.detach().cpu().numpy()), 
                     self.scaling_fn(output.detach().cpu().numpy())
                 ) * (batch['x'].shape[0]//100)
-
-                if self.trial is not None: #optuna
-                    self.iter_cnt +=1
-                    self.trial.report(loss.item(), self.iter_cnt)
-                    
-                    if self.trial.should_prune():
-                        raise optuna.exceptions.TrialPruned()
 
         return total_loss/self.len_valid, total_smape/self.len_valid
     
