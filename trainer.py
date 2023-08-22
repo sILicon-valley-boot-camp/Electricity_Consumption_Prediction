@@ -49,12 +49,6 @@ class Trainer():
             if bad_counter == self.patience:
                 break
 
-            if self.trial is not None and self.trial.should_prune(): #using optuna
-                raise optuna.exceptions.TrialPruned()
-            
-            if self.trial is not None:
-                self.trial.report(loss_val, epoch)
-
             if self.use_ray:
                 session.report({"loss": loss_val, "smape":smape_valid})
 
@@ -114,6 +108,12 @@ class Trainer():
                     self.scaling_fn(y.detach().cpu().numpy()), 
                     self.scaling_fn(output.detach().cpu().numpy())
                 ) * (batch['x'].shape[0]//100)
+
+                if self.trial is not None: #optuna
+                    self.trial.report(total_loss/self.len_valid, epoch)
+                    
+                    if self.trial.should_prune():
+                        raise optuna.exceptions.TrialPruned()
 
         return total_loss/self.len_valid, total_smape/self.len_valid
     
