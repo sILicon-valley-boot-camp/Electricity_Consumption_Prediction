@@ -191,7 +191,7 @@ if __name__ == '__main__':
         log_to_file=os.path.join(path, "log.log")
     )
     
-    trainable = tune.with_resources(main, {"gpu": 0.25})
+    trainable = tune.with_resources(main, {"gpu": args.gpu_ratio})
     tuner = tune.Tuner(main, param_space=search_space, tune_config=tune_config, run_config=run_config)
     results = tuner.fit()
 
