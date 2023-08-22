@@ -110,7 +110,7 @@ class Trainer():
                 ) * (batch['x'].shape[0]//100)
 
                 if self.trial is not None: #optuna
-                    self.trial.report(total_loss/self.len_valid, epoch)
+                    self.trial.report(loss.item(), epoch)
                     
                     if self.trial.should_prune():
                         raise optuna.exceptions.TrialPruned()
