@@ -4,11 +4,12 @@ import torch
 import optuna
 import numpy as np
 from tqdm import tqdm
+from ray.air import session
 
 from utils import smape
 
 class Trainer():
-    def __init__(self, train_loader, valid_loader, model, loss_fn, optimizer, scheduler, scaling_fn, device, patience, epochs, result_path, fold_logger, len_train, len_valid, trial=None):
+    def __init__(self, train_loader, valid_loader, model, loss_fn, optimizer, scheduler, scaling_fn, device, patience, epochs, result_path, fold_logger, len_train, len_valid, trial=None, use_ray=False):
         self.train_loader = tqdm(train_loader, file=sys.stdout) if trial is None else train_loader
         self.valid_loader = valid_loader
         self.model = model
@@ -24,8 +25,10 @@ class Trainer():
         self.best_model_path = os.path.join(result_path, 'best_model.pt')
         self.len_train = len_train
         self.len_valid = len_valid
-        self.trial = trial
         
+        self.trial = trial
+        self.use_ray = use_ray
+                  
     def train(self):
         best = np.inf
         for epoch in range(1,self.epochs+1):
@@ -46,8 +49,15 @@ class Trainer():
             if bad_counter == self.patience:
                 break
 
-            if self.trial is not None and self.trial.should_prune():
+            if self.trial is not None and self.trial.should_prune(): #using optuna
                 raise optuna.exceptions.TrialPruned()
+            
+            if self.trial is not None:
+                self.trial.report(loss_val, epoch)
+
+            if self.use_ray:
+                session.report({"loss": loss_val, "smape":smape_valid})
+
         return best
 
     def train_step(self, epoch):
@@ -105,10 +115,6 @@ class Trainer():
                     self.scaling_fn(output.detach().cpu().numpy())
                 ) * (batch['x'].shape[0]//100)
 
-        
-        if self.trial is not None:
-            self.trial.report(total_loss/self.len_valid, epoch)
-                
         return total_loss/self.len_valid, total_smape/self.len_valid
     
     def test(self, test_loader): #for making predictions on validation set, generating input for stacking Ensemble

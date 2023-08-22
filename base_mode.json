@@ -1,0 +1,23 @@
+{
+    "GNN": "GCN", 
+    "dropout": 0.5, 
+    "emb_dim": 10, 
+    "gnn_drop_p": 0.5, 
+    "gnn_hidden": 50, 
+    "gnn_input": ["enc_out", "node_emb"], 
+    "gnn_n_layers": 2, 
+    "gnn_output_size": 10, 
+    "graph": "EU_ts_weighted_knn", 
+    "hidden": 50, 
+    "jk": null, 
+    "k": 3, 
+    "lr": 0.001, 
+    "model": "LSTM", 
+    "norm": null, 
+    "num_layers": 1, 
+    "outputs_after_gnn": ["enc_out", "node_emb"],
+    "pooling": "last",
+    "scaler_name": "MinMax", 
+    "sim": "cosine", 
+    "window_size": 48
+}
