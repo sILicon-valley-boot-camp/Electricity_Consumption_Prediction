@@ -103,8 +103,8 @@ if __name__ == "__main__":
         fold_logger.info(f'start training of {fold+1}-fold')
         #logger to log current n-fold output
 
-        train_dataset = GraphTimeDataset(ts_df=train_data, flat_df=flat_data, graph=graph, label=output_index, window_size=args.window_size, time_index=kfold_train_time)
-        valid_dataset = GraphTimeDataset(ts_df=train_data, flat_df=flat_data, graph=graph, label=output_index, window_size=args.window_size, time_index=kfold_valid_time)
+        train_dataset = GraphTimeDataset(ts_df=train_data, flat_df=flat_data, graph=graph, label=output_index, window_size=args.window_size, time_index=kfold_train_time, device=device)
+        valid_dataset = GraphTimeDataset(ts_df=train_data, flat_df=flat_data, graph=graph, label=output_index, window_size=args.window_size, time_index=kfold_valid_time, device=device)
 
         model = getattr(models , 'RnnGnn')(args, input_size).to(device)
         loss_fn = get_loss(args.loss_name)
@@ -122,7 +122,7 @@ if __name__ == "__main__":
             train_loader, valid_loader, model, loss_fn, optimizer, scheduler, scaling_fn, device, args.patience, args.epochs, fold_result_path, fold_logger, len(train_dataset), len(valid_dataset))
         trainer.train() #start training
 
-        test_dataset = GraphTimeDataset(ts_df=test_data, flat_df=flat_data, graph=graph, label=output_index, window_size=args.window_size, time_index=test_time)
+        test_dataset = GraphTimeDataset(ts_df=test_data, flat_df=flat_data, graph=graph, label=output_index, window_size=args.window_size, time_index=test_time, device=device)
         test_loader = DataLoader(
             test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers
         ) #make test data loader
