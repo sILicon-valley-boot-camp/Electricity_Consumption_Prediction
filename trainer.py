@@ -25,6 +25,8 @@ class Trainer():
         self.best_model_path = os.path.join(result_path, 'best_model.pt')
         self.len_train = len_train
         self.len_valid = len_valid
+
+        self.iter_cnt = 0
         
         self.trial = trial
         self.use_ray = use_ray
@@ -110,7 +112,8 @@ class Trainer():
                 ) * (batch['x'].shape[0]//100)
 
                 if self.trial is not None: #optuna
-                    self.trial.report(loss.item(), epoch)
+                    self.iter_cnt +=1
+                    self.trial.report(loss.item(), self.iter_cnt)
                     
                     if self.trial.should_prune():
                         raise optuna.exceptions.TrialPruned()
