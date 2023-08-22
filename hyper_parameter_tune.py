@@ -173,7 +173,7 @@ def tune_args(args, trial):
 
 if __name__ == '__main__':
     args = get_args()
-    path = os.path.join(args.result_path, 'tuning_'+args.comment+str(len(os.listdir(args.result_path))))
+    path = os.path.join(args.result_path, 'tuning_'+args.comment+'_'+str(len(os.listdir(args.result_path))))
     args.result_path = path
     os.makedirs(path)
 
