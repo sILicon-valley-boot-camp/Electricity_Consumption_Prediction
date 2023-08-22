@@ -4,7 +4,7 @@ import json
 import torch
 import random
 import warnings
-warnings.simplefilter("once")
+warnings.simplefilter("ignore")
 import numpy as np
 
 def seed_everything(seed: int):

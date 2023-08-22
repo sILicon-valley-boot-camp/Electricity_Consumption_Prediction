@@ -48,7 +48,7 @@ class SaveVisCallback:
     def __call__(self, study: optuna.study.Study, trial: optuna.trial.FrozenTrial) -> None:
         joblib.dump(study, os.path.join(self.path, f"study.pkl"))
 
-        if (trial+1) % 10 == 0:
+        if (trial.number+1) % 10 == 0:
             self.visualize_optuna(study)
 
 def main(trial, args=None):
@@ -144,7 +144,7 @@ def tune_args(args, trial):
     args.k = trial.suggest_int("k", 2, 90)
     args.sim = trial.suggest_categorical("sim", ['minkowski', 'cosine'])
     #args.graph_type = trial.suggest_categorical("graph_type", ['graph', 'directed'])
-    args.graph = 'directed'
+    args.graph_type = 'directed'
 
     # model
     args.model = trial.suggest_categorical("model", ['LSTM', 'GRU'])
