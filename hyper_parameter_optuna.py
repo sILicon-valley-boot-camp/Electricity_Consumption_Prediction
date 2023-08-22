@@ -173,13 +173,16 @@ def tune_args(args, trial):
 
 if __name__ == '__main__':
     args = get_args()
+    args.patience = -1
+    args.num_workers = 0
+
     path = os.path.join(args.result_path, 'tuning_'+args.comment+'_'+str(len(os.listdir(args.result_path))))
     args.result_path = path
     os.makedirs(path)
 
     objective =  partial(main,args=args)
     callback = SaveVisCallback(path)
-    study = optuna.create_study(direction="minimize", sampler=optuna.samplers.TPESampler(), pruner=optuna.pruners.HyperbandPruner())
+    study = optuna.create_study(direction="minimize", sampler=optuna.samplers.TPESampler(seed=args.seed), pruner=optuna.pruners.HyperbandPruner())
     study.optimize(objective, n_trials=args.n_trials, timeout=args.timeout, n_jobs=args.n_job_parallel, callbacks=[callback])
 
     pruned_trials = study.get_trials(deepcopy=False, states=[optuna.trial.TrialState.PRUNED])
