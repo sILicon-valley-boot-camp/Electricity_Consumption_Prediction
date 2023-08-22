@@ -165,10 +165,10 @@ if __name__ == '__main__':
     search_space = tune_args(args).__dict__
 
     with open('base_model.json') as json_file:
-        config_args = [json.load(json_file)]
+        config_args = json.load(json_file)
 
     optuna_search = OptunaSearch(
-        points_to_evaluate=align_args(config_args, vars(args)), 
+        points_to_evaluate=[align_args(config_args, args.__dict__)], 
         sampler=optuna.samplers.TPESampler()
     )
 
