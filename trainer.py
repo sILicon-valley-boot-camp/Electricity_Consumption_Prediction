@@ -63,14 +63,11 @@ class Trainer():
         total_smape = 0
         for batch in self.train_loader:
             del batch['batch']; del batch['ptr']
-            batch = batch.to(self.device)
-            flat = self.flat.to(self.device)
-
             y = batch.pop('y').reshape(-1, 1)
             self.optimizer.zero_grad()
             output = self.model(
                     node_feat=batch['x'], 
-                    flat=flat, 
+                    flat=self.flat, 
                     edge_index=batch['edge_index'] if 'edge_index' in batch.keys else None, 
                     edge_weight=batch['edge_attr'] if 'edge_attr' in batch.keys else None
             )
@@ -100,13 +97,11 @@ class Trainer():
             total_smape = 0
             for batch in self.valid_loader:
                 del batch['batch']; del batch['ptr']
-                batch = batch.to(self.device)
-                flat = self.valid_loader.dataset.flat.to(self.device)
                 
                 y = batch.pop('y').reshape(-1, 1)
                 output = self.model(
                     node_feat=batch['x'], 
-                    flat=flat, 
+                    flat=self.flat, 
                     edge_index=batch['edge_index'] if 'edge_index' in batch.keys else None, 
                     edge_weight=batch['edge_attr'] if 'edge_attr' in batch.keys else None
                 ) 
@@ -127,12 +122,11 @@ class Trainer():
             result = []
             for batch in test_loader:
                 del batch['y']; del batch['batch']; del batch['ptr']
-                batch = batch.to(self.device)
-                flat = test_loader.dataset.flat.to(self.device)
+                batch = batch
 
                 output = self.model(
                     node_feat=batch['x'], 
-                    flat=flat, 
+                    flat=self.flat, 
                     edge_index=batch['edge_index'] if 'edge_index' in batch.keys else None, 
                     edge_weight=batch['edge_attr'] if 'edge_attr' in batch.keys else None
                 ).detach().cpu().unsqueeze(-1).reshape(-1, 100).numpy()
