@@ -129,7 +129,7 @@ def main(trial, args=None):
     )
     
     trainer = Trainer(
-        train_loader, valid_loader, model, loss_fn, optimizer, scheduler, scaling_fn, device, args.patience, args.epochs, result_path, logger, len(train_dataset), len(valid_dataset), trial)
+        train_loader, valid_loader, model, loss_fn, optimizer, scheduler, scaling_fn, device, args.patience, args.epochs, args.base_epochs, result_path, logger, len(train_dataset), len(valid_dataset), trial)
     
     return trainer.train()
 

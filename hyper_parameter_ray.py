@@ -106,7 +106,7 @@ def main(args):
     )
     
     trainer = Trainer(
-        train_loader, valid_loader, model, loss_fn, optimizer, scheduler, scaling_fn, device, args.patience, args.epochs, result_path, logger, len(train_dataset), len(valid_dataset), use_ray=True)
+        train_loader, valid_loader, model, loss_fn, optimizer, scheduler, scaling_fn, device, args.patience, args.epochs, args.base_epochs, result_path, logger, len(train_dataset), len(valid_dataset), use_ray=True)
     return trainer.train()
 
 def tune_args(args):

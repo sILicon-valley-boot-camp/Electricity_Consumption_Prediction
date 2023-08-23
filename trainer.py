@@ -13,7 +13,7 @@ except:
 from utils import smape
 
 class Trainer():
-    def __init__(self, train_loader, valid_loader, model, loss_fn, optimizer, scheduler, scaling_fn, device, patience, epochs, result_path, fold_logger, len_train, len_valid, trial=None, use_ray=False):
+    def __init__(self, train_loader, valid_loader, model, loss_fn, optimizer, scheduler, scaling_fn, device, patience, epochs, base_epochs, result_path, fold_logger, len_train, len_valid, trial=None, use_ray=False):
         self.train_loader = tqdm(train_loader, file=sys.stdout) if trial is None else train_loader
         self.valid_loader = valid_loader
         self.model = model
@@ -25,6 +25,7 @@ class Trainer():
         self.device = device
         self.patience = patience
         self.epochs = epochs
+        self.base_epochs = base_epochs
         self.logger = fold_logger
         self.best_model_path = os.path.join(result_path, 'best_model.pt')
         self.len_train = len_train
@@ -53,7 +54,7 @@ class Trainer():
             else:
                 bad_counter += 1
 
-            if bad_counter == self.patience:
+            if (bad_counter == self.patience) and epoch > self.base_epochs:
                 break
 
             if self.use_ray:

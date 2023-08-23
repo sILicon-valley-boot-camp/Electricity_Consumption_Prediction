@@ -20,6 +20,7 @@ def args_for_train(parser):
     parser.add_argument('--num_workers', type=int, default=4, help='num_workers')
     parser.add_argument('--batch_size', type=int, default=None, help='batch_size')
     parser.add_argument('--epochs', type=int, default=1000, help='max epochs')
+    parser.add_argument('--base_epochs', type=int, default=-1, help='apply early stopping after base_epochs')
     parser.add_argument('--patience', type=int, default=15, help='patience for early stopping')    
     parser.add_argument('--lr', type=float, default=5e-4, help='learning rate for the optimizer')
     parser.add_argument('--scheduler', type=str, default='None')

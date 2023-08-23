@@ -119,7 +119,7 @@ if __name__ == "__main__":
         )
         
         trainer = Trainer(
-            train_loader, valid_loader, model, loss_fn, optimizer, scheduler, scaling_fn, device, args.patience, args.epochs, fold_result_path, fold_logger, len(train_dataset), len(valid_dataset))
+            train_loader, valid_loader, model, loss_fn, optimizer, scheduler, scaling_fn, device, args.patience, args.epochs, args.base_epochs, fold_result_path, fold_logger, len(train_dataset), len(valid_dataset))
         trainer.train() #start training
 
         test_dataset = GraphTimeDataset(ts_df=test_data, flat_df=flat_data, graph=graph, label=output_index, window_size=args.window_size, time_index=test_time, device=device)
@@ -134,5 +134,5 @@ if __name__ == "__main__":
         #may need testing with trainer.inference()
         stackking_input.to_csv(os.path.join(result_path, f'for_stacking_input.csv'), index=False)
 
-prediction['answer'] = prediction['answer'] / 10 #use the most likely results as my final prediction
-prediction.to_csv(os.path.join(result_path, 'prediction.csv'), index=False)
+    prediction['answer'] = prediction['answer'] / args.cv_k #use the most likely results as my final prediction
+    prediction.to_csv(os.path.join(result_path, 'prediction.csv'), index=False)
