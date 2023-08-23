@@ -130,11 +130,13 @@ def main(trial, args=None):
     
     trainer = Trainer(
         train_loader, valid_loader, model, loss_fn, optimizer, scheduler, scaling_fn, device, args.patience, args.epochs, result_path, logger, len(train_dataset), len(valid_dataset), trial)
+    
     return trainer.train()
 
 def tune_args(args, trial):
     # data
-    args.window_size = trial.suggest_int("window_size", 10, 128)
+    #args.window_size = trial.suggest_int("window_size", 10, 128)
+    args.window_size = 24
 
     # training
     args.lr = trial.suggest_float("lr", 1e-5, 1e-2)

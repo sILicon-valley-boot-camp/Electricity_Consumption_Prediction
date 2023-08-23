@@ -42,7 +42,8 @@ class Trainer():
 
             if loss_val < best:
                 best = loss_val
-                torch.save(self.model.state_dict(), self.best_model_path)
+                if not (self.use_ray or self.trial is not None):
+                    torch.save(self.model.state_dict(), self.best_model_path)
                 bad_counter = 0
 
             else:
