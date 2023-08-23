@@ -178,13 +178,21 @@ if __name__ == '__main__':
     args.patience = -1
     args.num_workers = 0
 
-    path = os.path.join(args.result_path, 'tuning_'+args.comment+'_'+str(len(os.listdir(args.result_path))))
-    args.result_path = path
-    os.makedirs(path)
-
-    objective =  partial(main,args=args)
-    callback = SaveVisCallback(path)
-    study = optuna.create_study(direction="minimize", sampler=optuna.samplers.TPESampler(seed=args.seed), pruner=optuna.pruners.HyperbandPruner())
+    if args.continue_tune_from is None:
+        path = os.path.join(args.result_path, 'tuning_'+args.comment+'_'+str(len(os.listdir(args.result_path))))
+        os.makedirs(path)
+        args.result_path = path
+        objective =  partial(main,args=args)
+        callback = SaveVisCallback(path)
+        study = optuna.create_study(direction="minimize", sampler=optuna.samplers.TPESampler(seed=args.seed), pruner=optuna.pruners.HyperbandPruner())
+    
+    else:
+        path = args.continue_tune_from
+        args.result_path = path
+        objective =  partial(main,args=args)
+        callback = SaveVisCallback(path)    
+        study = joblib.load(os.path.join(path, "study.pkl"))
+    
     study.optimize(objective, n_trials=args.n_trials, timeout=args.timeout, n_jobs=args.n_job_parallel, callbacks=[callback], show_progress_bar=True)
 
     pruned_trials = study.get_trials(deepcopy=False, states=[optuna.trial.TrialState.PRUNED])

@@ -41,6 +41,7 @@ def args_for_tuning(parser):
     parser.add_argument('--timeout', type=int, default=None, help='optuna training timeout(sec)')
     parser.add_argument('--n_job_parallel', type=int, default=1, help='n_job_parallel(optuna)')
     parser.add_argument('--gpu_ratio', type=float, default=1, help='percentage of gpu resource for 1 trial(ray)')
+    parser.add_argument('--continue_tune_from', type=str, help='continue tuning from args.continue_tune_from')
 
 def args_for_config_file(parser):
     parser.add_argument('--config', default=None, type=str, help='read from config file')
