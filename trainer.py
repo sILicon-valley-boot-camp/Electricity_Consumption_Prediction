@@ -1,10 +1,14 @@
 import os
 import sys
 import torch
-import optuna
 import numpy as np
 from tqdm import tqdm
-from ray.air import session
+
+try:
+    import optuna
+    from ray.air import session
+except:
+    print('Import error')
 
 from utils import smape
 
