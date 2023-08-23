@@ -54,7 +54,7 @@ class Trainer():
             else:
                 bad_counter += 1
 
-            if (bad_counter == self.patience) and epoch > self.base_epochs:
+            if (bad_counter >= self.patience) and epoch > self.base_epochs:
                 break
 
             if self.use_ray:
