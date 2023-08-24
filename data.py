@@ -15,7 +15,7 @@ class GraphTimeDataset(Dataset): #get graph data at t time step
         self.window_size = window_size
         self.time_index = time_index
         self.times = self.ts[self.ts['건물번호'] == 1]['일시'].reset_index(drop=True)
-        self.drop = ['num_date_time', '건물번호', '일시']
+        self.drop = list(set(self.ts.columns) & {'num_date_time', '건물번호', '일시'})
 
         self.data = torch.stack([torch.tensor(group.drop(columns = [label] + self.drop).values, dtype=torch.float, device=device) for _, group in self.ts.groupby('건물번호')])
         self.y = torch.stack([torch.tensor(group[label].values, dtype=torch.float, device=device) for _, group in self.ts.groupby('건물번호')])
