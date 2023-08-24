@@ -28,7 +28,7 @@ parser.add_argument("--drop", nargs='*')
 
 parser.add_argument("--seed", type=int, default=72)
 parser.add_argument("--eval_metric", default='mae')
-parser.add_argument("--use_custom_metric", action='store_ture')
+parser.add_argument("--use_custom_metric", action='store_true')
 
 args = parser.parse_args()
 
@@ -45,9 +45,9 @@ else:
 train_y = train_data[args.target_col]
 
 if args.use_custom_metric: # https://github.com/mljar/mljar-supervised/issues/390#issuecomment-830049603
-    automl = AutoML(mode=args.mode, eval_metric=custom_metric, total_time_limit=args.time_limit, optuna_time_budget=args.time_limit, eval_metric=args.eval_metric, random_state=args.seed, results_path=args.name)
+    automl = AutoML(mode=args.mode, eval_metric=custom_metric, total_time_limit=args.time_limit, optuna_time_budget=args.time_limit, random_state=args.seed, results_path=args.name)
 else:
-    automl = AutoML(mode=args.mode, total_time_limit=args.time_limit, optuna_time_budget=args.time_limit, eval_metric=args.eval_metric, random_state=args.seed, results_path=args.name)
+    automl = AutoML(mode=args.mode, eval_metric=args.eval_metric, total_time_limit=args.time_limit, optuna_time_budget=args.time_limit, random_state=args.seed, results_path=args.name)
 automl.fit(train_x, train_y)
 
 pred = automl.predict(test_x)
