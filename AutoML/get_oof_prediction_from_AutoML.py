@@ -15,7 +15,6 @@ def process_oof(task, oof):
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--name", default= 'AutoML_1')
-parser.add_argument("--train_csv")
 parser.add_argument("--test_csv")
 args = parser.parse_args()
 
@@ -31,12 +30,19 @@ for column in automl._data_info["columns"]:
     if column not in input_columns:
             raise AutoMLException(f"Missing column: {column} in input data. Cannot predict")
 test_data = test_data[automl._data_info["columns"]]
+stacked_test_data = automl.get_stacked_data(test_data, mode="predict")
 
 train_all_oofs = []
 test_all_oofs = []
 for m in automl._stacked_models + [model for model in automl._models if "Stacked" in model.get_name()]:
     train_oof = m.get_out_of_folds()
-    test_oof = m.predict(test_data)
+    
+    if m._is_stacked:
+        test_oof = m.predict(stacked_test_data)
+    if model.get_type() == "Ensemble":
+        test_oof = m.predict(test_data, stacked_test_data)
+    else:
+        test_oof = m.predict(test_data)
 
     train_all_oofs += [process_oof(automl._ml_task, train_oof)]
     test_all_oofs += [process_oof(automl._ml_task, test_oof)]
