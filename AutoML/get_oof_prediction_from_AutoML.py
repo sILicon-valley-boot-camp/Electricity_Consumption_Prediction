@@ -38,9 +38,10 @@ for m in automl._stacked_models + [model for model in automl._models if "Stacked
     train_oof = m.get_out_of_folds()
     
     if m._is_stacked:
-        test_oof = m.predict(stacked_test_data)
-    if model.get_type() == "Ensemble":
-        test_oof = m.predict(test_data, stacked_test_data)
+        if m.get_type() == "Ensemble":
+            test_oof = m.predict(test_data, stacked_test_data)
+        else:
+            test_oof = m.predict(stacked_test_data)
     else:
         test_oof = m.predict(test_data)
 
