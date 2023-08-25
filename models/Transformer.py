@@ -10,7 +10,7 @@ class PositionalEncoding(nn.Module):
         position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
         div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model))
         pe[:, 0::2] = torch.sin(position * div_term)
-        pe[:, 1::2] = torch.cos(position * div_term)[:, :-1]
+        pe[:, 1::2] = torch.cos(position * div_term)[:, :-1] if d_model//2==1 else torch.cos(position * div_term)
         pe = pe.unsqueeze(0).transpose(0, 1)
         #pe.requires_grad = False
         self.register_buffer('pe', pe)
@@ -24,7 +24,7 @@ class TimeSeriesTransformerEncoder(nn.Module):
         self.transformer_pooling = args.pooling 
         self.pos_encoder = PositionalEncoding(feature_size)
         self.use_cls = False
-        if args.transformer_pooling== 'first':
+        if self.transformer_pooling== 'first':
             self.use_cls = True
             self.cls_token = nn.Parameter(torch.zeros(1, 1, feature_size))
             

@@ -149,14 +149,18 @@ def tune_args(args, trial):
     args.graph_type = 'directed'
 
     # model
-    args.model = trial.suggest_categorical("model", ['LSTM', 'GRU'])
+    args.model = trial.suggest_categorical("model", ['LSTM', 'GRU', 'transformer'])
     args.GNN = trial.suggest_categorical("GNN", ["GCN", "GraphSAGE", "GIN", "GAT", "EdgeCNN"])
+    args.dropout = trial.suggest_float("dropout", 0.2, 0.8)
+    args.pooling = trial.suggest_categorical("pooling", ['mean', 'max', 'last', 'first'])
     
     # LSTM & GRU
-    args.pooling = trial.suggest_categorical("pooling", ['mean', 'max', 'last', 'first'])
-    args.dropout = trial.suggest_float("dropout", 0.2, 0.8)
-    args.hidden = trial.suggest_int("hidden", 10, 512)
-    args.num_layers = trial.suggest_int("num_layers", 1, 4)
+    if args.model=='LSTM' or args.model=='GRU':
+        args.hidden = trial.suggest_int("hidden", 10, 512)
+        args.num_layers = trial.suggest_int("num_layers", 1, 4)
+    else:
+        args.n_head = trial.suggest_int("n_head", 2, 8, 2) # feature size is dividable by 2
+        args.num_layers = trial.suggest_int("Transformer_num_layers", 1, 4)
 
     # GNN
     args.gnn_hidden = trial.suggest_int("gnn_hidden", 10, 512)
