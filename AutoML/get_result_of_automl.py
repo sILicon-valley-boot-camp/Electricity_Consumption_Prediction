@@ -18,12 +18,13 @@ if __name__ == "__main__":
     for folder in folders:
         leaderboard = pd.read_csv(os.path.join(folder, "leaderboard.csv"))
         best_model = leaderboard[leaderboard['metric_value']==leaderboard['metric_value'].min()]
-        model_name.append(best_model['name'])
-        metric_value.append(best_model['metric_value'])
+        model_name.append(best_model['name'].values[0])
+        metric_value.append(best_model['metric_value'].values[0])
 
     result = pd.DataFrame()
     result['folder'] = folders
     result['best_model'] = model_name
     result['smape'] = metric_value
+    result.to_csv(args.name+'.csv', index=False)
 
-    print(f"mean: {result['smape'].mean()}")
+    print(f"mean: {result['smape'].values.mean()}")
