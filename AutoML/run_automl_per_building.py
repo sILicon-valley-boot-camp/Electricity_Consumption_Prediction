@@ -56,6 +56,7 @@ def process_data(args):
 
 if __name__ == '__main__':
     args = get_args()
+    os.makedirs(args.name, exist_ok=True)
 
     train, test = process_data(args)
     models = run(args.building_no, args, train)
