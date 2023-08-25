@@ -31,7 +31,7 @@ if __name__ == '__main__':
     submission = pd.read_csv(args.submission)
 
     for num in range(args.start_from, args.end_to+1):
-        path = os.path.join(args.name, 'building'+num)
+        path = os.path.join(args.name, 'building'+str(num))
         automl = AutoML()
         automl.load(path)
 
