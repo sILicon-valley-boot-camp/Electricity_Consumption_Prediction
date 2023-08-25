@@ -31,6 +31,7 @@ def get_args():
     parser.add_argument('--building_no', type=int, required=True)
     parser.add_argument('--n_jobs', type=int, required=True)
 
+    return parser.parse_args()
 
 def run(index, args, data):
     automl = AutoML(mode=args.mode, eval_metric=custom_metric, total_time_limit=args.time_limit, optuna_time_budget=args.time_limit, random_state=args.seed, results_path=os.path.join(args.name, 'building'+str(index)), n_jobs=args.n_jobs)
