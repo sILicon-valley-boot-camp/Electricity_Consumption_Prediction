@@ -7,6 +7,10 @@ from supervised.automl import AutoML
 
 
 def custom_metric(y_true, y_predicted, sample_weight=None):
+    if isinstance(y_true, pd.DataFrame):
+        y_true = y_true.values
+        y_predicted = y_predicted.values
+        
     v = 2 * abs(y_predicted - y_true) / ((abs(y_predicted) + abs(y_true)) + 1e-9)
     output = np.mean(v) * 100
     return output
@@ -34,7 +38,8 @@ def get_args():
     return parser.parse_args()
 
 def run(index, args, data):
-    automl = AutoML(mode=args.mode, eval_metric=custom_metric, total_time_limit=args.time_limit, optuna_time_budget=args.time_limit, random_state=args.seed, results_path=os.path.join(args.name, 'building'+str(index)), n_jobs=args.n_jobs)
+    alg = ['Baseline', 'Linear', 'Decision Tree', 'Random Forest', 'Extra Trees', 'LightGBM', 'Xgboost', 'CatBoost', 'Neural Network'   ]
+    automl = AutoML(mode=args.mode, algorithms=alg, eval_metric=custom_metric, total_time_limit=args.time_limit, optuna_time_budget=args.time_limit, random_state=args.seed, results_path=os.path.join(args.name, 'building'+str(index)), n_jobs=args.n_jobs)
     automl.fit(data['x'], data['y'])
     return automl
 
