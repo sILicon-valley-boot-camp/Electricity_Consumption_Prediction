@@ -45,11 +45,12 @@ def process_data(args):
     train_building = train[train['건물번호']==args.building_no]
     test_building = test[test['건물번호']==args.building_no]
 
+    buildings = [f'building_{i}' for i in range(1, 101)]
     if args.drop is not None:
-        train_x = train_building.drop(columns=args.drop + [args.target_col], axis = 1)
+        train_x = train_building.drop(columns=args.drop + [args.target_col] + buildings, axis = 1)
         test_x = test_building.drop(columns=args.drop, axis = 1)
     else:
-        train_x = train_building.drop(columns=[args.target_col], axis = 1)
+        train_x = train_building.drop(columns=[args.target_col] + buildings, axis = 1)
         test_x = test_building
 
     return {'x': train_x, 'y': train_building[args.target_col]}, {'x': test_x}
