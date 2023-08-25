@@ -42,8 +42,11 @@ class SaveVisCallback:
             ['plot_edf', 'plot_rank', 'plot_slice', 'plot_contour', 'plot_timeline', 'plot_param_importances', 'plot_intermediate_values', 'plot_parallel_coordinate', 'plot_optimization_history'],
             [plot_edf, plot_rank, plot_slice, plot_contour, plot_timeline, plot_param_importances, plot_intermediate_values, plot_parallel_coordinate, plot_optimization_history]
          ):
-            fig = vis(study)
-            fig.write_image(file=os.path.join(self.path, f'{method}.png'), format='png') 
+            try:
+                fig = vis(study)
+                fig.write_image(file=os.path.join(self.path, f'{method}.png'), format='png') 
+            except Exception as e:
+                print(f'Error using {method}\n{e}')
 
     def __call__(self, study: optuna.study.Study, trial: optuna.trial.FrozenTrial) -> None:
         joblib.dump(study, os.path.join(self.path, f"study.pkl"))
