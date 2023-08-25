@@ -17,7 +17,7 @@ def get_args():
 def process_data(test, num, args):
     test_building = test[test['건물번호']==num]
 
-    buildings = [f'building_{i}' for i in range(1, 101)]
+    buildings = [f'building_num_{i}' for i in range(1, 101)]
     if args.drop is not None:
         test_x = test_building.drop(columns=args.drop + buildings, axis = 1)
     else:
@@ -33,6 +33,7 @@ if __name__ == '__main__':
     for num in range(args.start_from, args.end_to+1):
         path = os.path.join(args.name, 'building'+str(num))
         automl = AutoML()
+        automl.results_path = path
         automl.load(path)
 
         building_data = process_data(test, num, args)
