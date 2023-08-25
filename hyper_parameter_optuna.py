@@ -161,6 +161,7 @@ def tune_args(args, trial):
     else:
         args.n_head = trial.suggest_int("n_head", 2, 8, 2) # feature size is dividable by 2
         args.num_layers = trial.suggest_int("Transformer_num_layers", 1, 4)
+        args.transformer_dropout = trial.suggest_float("transformer_dropout", 0.2, 0.8)
 
     # GNN
     args.gnn_hidden = trial.suggest_int("gnn_hidden", 10, 512)

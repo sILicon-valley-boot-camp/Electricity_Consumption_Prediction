@@ -13,6 +13,7 @@ def args_for_model(parser, model, GNN_model=None):
     if model == 'transformer':
         parser.add_argument('--n_head', type=int, default=5)
         parser.add_argument('--num_layers', type=int, default=1)
+        parser.add_argument('--transformer_dropout', type=float, default=0.5)
 
     if model == 'LSTM' or model == 'GRU':
         parser.add_argument('--hidden', type=int, default=50)
