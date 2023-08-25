@@ -69,6 +69,6 @@ if __name__ == '__main__':
 
     pred = models.predict(test['x'])
     submission = pd.read_csv(args.submission)
-    submission['answer'] = pred
+    submission.loc[test['x'].index, 'answer'] = pred
     
     submission.to_csv(f"{args.name}_{args.building_no}_submission.csv", index=False)
