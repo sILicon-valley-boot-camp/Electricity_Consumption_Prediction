@@ -29,6 +29,7 @@ if __name__ == '__main__':
     args = get_args()
     test = pd.read_csv(args.test_csv)
     submission = pd.read_csv(args.submission)
+    submission['answer'] = -1
 
     for num in range(args.start_from, args.end_to+1):
         path = os.path.join(args.name, 'building'+str(num))
@@ -39,7 +40,6 @@ if __name__ == '__main__':
         building_data = process_data(test, num, args)
         index = building_data.index
         pred = automl.predict(building_data)
-        submission = pd.read_csv(args.submission)
         submission.loc[index, 'answer'] = pred
         
     submission.to_csv(f"{args.name}_{args.start_from}_{args.end_to}_submission.csv", index=False)
