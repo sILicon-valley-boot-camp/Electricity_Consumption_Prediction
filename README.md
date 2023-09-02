@@ -1,5 +1,7 @@
 # Using AutoML with GNN Stacking Ensemble meta model 
-
+![스크린샷 2023-09-02 112739](https://github.com/sILicon-valley-boot-camp/Electricity_Consumption_Prediction/assets/67096173/2e02f3a2-54d4-4e32-9ae1-f2e63ab34552)
+- 위의 모델의 역할
+  - AutoML 만을 사용했을때는 이전의 정보를 사용하지 않는다는 점과 동일한 시간대에 다른 빌딩의 정보를 사용하지 못한다는 한계점을 가지고 있기 때문에 RNN-GNN Stacking Ensemble을 통해 AutoML과 DeepLearning 둘 모두의 장점을 취했습니다. 
 - running AutoML
 ```
 cd AutoML
@@ -18,3 +20,9 @@ python -u hyper_parameter_optuna.py --train ../data/ver13_train.csv --test ../da
 ```
 python main.py --config {hyperparameter tuned best model path}/config.json --target_args epochs base_epochs comment --comment run_best --base_epochs 100
 ```
+
+- features
+  - time-series feature을 기반으로 weighted directed knn graph 생성 (빌딩과 빌딩과의 유사성을 나타내는 100개의 노드를 가진 그래프) → 해당 그래프를 바탕으로 GNN 수행
+  - ts encoder (LSTM, GRU, RNN, Transformer), graph encoder(GCN, GAT, GraphSAGE, GIN, EdgeCNN), 그래프 생성 파라미터, 모델별 파라미터 → Hyper parameter tuning
+- Stacking Ensemble의 성능
+  - 기존 AutoML의 성과에서 추가적으로 0.05% ~ 0.125% 성능 Boosting
