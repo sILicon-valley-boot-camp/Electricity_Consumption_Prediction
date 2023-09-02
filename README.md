@@ -1,5 +1,5 @@
 # Using AutoML with GNN Stacking Ensemble meta model 
-![스크린샷 2023-09-02 112739](https://github.com/sILicon-valley-boot-camp/Electricity_Consumption_Prediction/assets/67096173/2e02f3a2-54d4-4e32-9ae1-f2e63ab34552)
+![스크린샷 2023-09-02 112739](https://github.com/sILicon-valley-boot-camp/Electricity_Consumption_Prediction/assets/67096173/d146fe98-957c-4509-b33c-a605f94c45a9)
 - 위의 모델의 역할
   - AutoML 만을 사용했을때는 이전의 정보를 사용하지 않는다는 점과 동일한 시간대에 다른 빌딩의 정보를 사용하지 못한다는 한계점을 가지고 있기 때문에 RNN-GNN Stacking Ensemble을 통해 AutoML과 DeepLearning 둘 모두의 장점을 취했습니다. 
 - running AutoML
