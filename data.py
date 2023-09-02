@@ -1,40 +1,43 @@
+import numpy as np
 import pandas as pd
 
 import torch
 from torch.utils.data import  Dataset
+from torch_geometric.data import Data   
+from torch_geometric.utils import from_networkx
 
-class DataSet(Dataset):
-    def __init__(self, data, label, window_size, target_index):
-        self.label = label
-        self.data = data.sort_values(by=['건물번호', '일시'], ignore_index=True)
-        self.drop = ['건물번호', '일시']
+class GraphTimeDataset(Dataset): #get graph data at t time step
+    def __init__(self, ts_df, flat_df, graph, window_size, time_index, label, device):
+        super().__init__()
+        self.ts = ts_df.sort_values(by=['건물번호', '일시'], ignore_index=True)
+        self.flat = torch.tensor(flat_df.values, dtype=torch.float, device=device) 
+
         self.window_size = window_size
-        self.target_index = target_index
+        self.time_index = time_index
+        self.times = self.ts[self.ts['건물번호'] == 1]['일시'].reset_index(drop=True)
+        self.drop = list(set(self.ts.columns) & {'num_date_time', '건물번호', '일시'})
+
+        self.data = torch.stack([torch.tensor(group.drop(columns = [label] + self.drop).values, dtype=torch.float, device=device) for _, group in self.ts.groupby('건물번호')])
+        self.y = torch.stack([torch.tensor(group[label].values, dtype=torch.float, device=device) for _, group in self.ts.groupby('건물번호')])
+        self.graph = from_networkx(graph).to(device) if graph is not None else None
 
     def __len__(self):
-        return len(self.target_index)
+        return len(self.time_index)
     
     def __getitem__(self, index):
-        data = self.data[self.target_index[index]-(self.window_size): self.target_index[index]+1]
-        y = data[self.label] # current time step - 11 ~ current time step, (when window_size=10)
-        x = data.iloc[1:].drop(columns = [self.label] + self.drop)  # current time step - 10 ~ current time step, (when window_size=10)
+        time = pd.date_range(self.time_index[index] - pd.Timedelta(hours=(self.window_size-1)) , self.time_index[index], freq='H')
+        data_index = self.times[self.times.isin(time)].index
+        target_index = self.times[self.times == self.time_index[index]].index
 
-        return {'x': torch.tensor(x.values, dtype=torch.float), #(window_size, feat_dim)
-                'y': torch.tensor(y.values, dtype=torch.float)} #(window_size+1, )
-    
-class TestDataSet(Dataset):
-    def __init__(self, data, window_size, test_start, test_end):
-        self.data = data
-        self.window_size = window_size-1
-        target_time = pd.date_range(test_start , test_end, freq='H')
-        self.target_index = self.data[self.data['일시'].isin(target_time)].index
-        self.drop = ['건물번호', '일시']
+        data = self.data[:, data_index, :]
+        y = self.y[:, target_index].squeeze(-1)
+        dict_data = {'x': data,
+                     'y': y,}
+                
+        if self.graph is not None:
+            dict_data['edge_index'] = self.graph.edge_index
 
-    def __len__(self):
-        return len(self.target_index)
-    
-    def __getitem__(self, index):
-        data = self.data[self.target_index[index]-(self.window_size): self.target_index[index]+1]
-        x = data.drop(columns = self.drop)  # current time step - 10 ~ current time step, (when window_size=10)
+        if self.graph is not None and self.graph.weight is not None:
+            dict_data['edge_attr'] = self.graph.weight
 
-        return {'x': torch.tensor(x.values, dtype=torch.float)}
+        return Data(**dict_data)
