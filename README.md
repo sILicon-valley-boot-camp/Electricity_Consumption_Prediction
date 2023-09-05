@@ -26,3 +26,7 @@ python main.py --config {hyperparameter tuned best model path}/config.json --tar
   - ts encoder (LSTM, GRU, RNN, Transformer), graph encoder(GCN, GAT, GraphSAGE, GIN, EdgeCNN), 그래프 생성 파라미터, 모델별 파라미터 → Hyper parameter tuning
 - Stacking Ensemble의 성능
   - 기존 AutoML의 성과에서 추가적으로 0.05% ~ 0.125% 성능 Boosting
+
+- 자세한 내용은 아래 블로그 참고해주세요!
+  
+  https://doun-lee.notion.site/Predicting-Electricity-Consumption-Using-Automl-with-Graph-representation-Learning-088b5f56acdf4a5091249ee23e44d850?pvs=4
